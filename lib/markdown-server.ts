@@ -4,6 +4,7 @@ import matter from 'gray-matter'
 import { remark } from 'remark'
 import remarkHtml from 'remark-html'
 import remarkGfm from 'remark-gfm'
+import remarkSlug from 'remark-slug'
 
 export interface DocFile {
   slug: string
@@ -46,6 +47,7 @@ export async function getDocFiles(projectName: string = 'default'): Promise<DocF
       
       const processedContent = await remark()
         .use(remarkGfm)
+        .use(remarkSlug)
         .use(remarkHtml, { sanitize: false })
         .process(content)
       
@@ -75,6 +77,7 @@ export async function getTermFiles(projectName: string = 'default'): Promise<Ter
       
       const processedContent = await remark()
         .use(remarkGfm)
+        .use(remarkSlug)
         .use(remarkHtml, { sanitize: false })
         .process(content)
       

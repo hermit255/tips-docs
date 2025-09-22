@@ -68,10 +68,14 @@ export function buildMenuStructure(docs: DocFile[]): MenuItem[] {
 
 export function extractTocFromHtml(html: string): Array<{id: string, text: string, level: number}> {
   const toc: Array<{id: string, text: string, level: number}> = []
-  const headingRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>(.*?)<\/h[1-6]>/g
   
+  // デバッグ用ログ
+  console.log('Extracting TOC from HTML:', html.substring(0, 500) + '...')
+  
+  // id属性がある見出しを優先して検索
+  const headingWithIdRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>(.*?)<\/h[1-6]>/gi
   let match
-  while ((match = headingRegex.exec(html)) !== null) {
+  while ((match = headingWithIdRegex.exec(html)) !== null) {
     const level = parseInt(match[1])
     const id = match[2]
     const text = match[3].replace(/<[^>]*>/g, '') // HTMLタグを除去
@@ -79,5 +83,18 @@ export function extractTocFromHtml(html: string): Array<{id: string, text: strin
     toc.push({ id, text, level })
   }
   
+  // id属性がない場合は、見出しテキストからidを生成
+  if (toc.length === 0) {
+    const headingRegex = /<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi
+    while ((match = headingRegex.exec(html)) !== null) {
+      const level = parseInt(match[1])
+      const text = match[2].replace(/<[^>]*>/g, '') // HTMLタグを除去
+      const id = text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '')
+      
+      toc.push({ id, text, level })
+    }
+  }
+  
+  console.log('Generated TOC:', toc)
   return toc
 }

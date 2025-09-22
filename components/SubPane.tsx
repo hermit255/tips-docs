@@ -74,7 +74,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
           <div>
             <h3>目次</h3>
             {toc.length > 0 ? (
-              <div>
+              <div className="toc-container">
                 {toc.map(renderTocItem)}
               </div>
             ) : (

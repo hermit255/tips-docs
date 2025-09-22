@@ -45,6 +45,58 @@ code {
   font-size: 0.9em;
 }
 
+/* TOCスタイル */
+.toc-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+.toc-item {
+  padding: 4px 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s;
+}
+
+.toc-item:hover {
+  background-color: #f0f0f0;
+}
+
+.toc-h1 {
+  font-weight: bold;
+  font-size: 16px;
+  padding-left: 8px;
+}
+
+.toc-h2 {
+  font-weight: bold;
+  font-size: 14px;
+  padding-left: 24px;
+}
+
+.toc-h3 {
+  font-size: 13px;
+  padding-left: 40px;
+}
+
+.toc-h4 {
+  font-size: 12px;
+  padding-left: 56px;
+}
+
+.toc-h5 {
+  font-size: 11px;
+  padding-left: 72px;
+}
+
+.toc-h6 {
+  font-size: 10px;
+  padding-left: 88px;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
