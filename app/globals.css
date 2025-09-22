@@ -16,6 +16,26 @@ body {
   background: #ffffff;
 }
 
+/* 見出し以外のインデント */
+p, div, span, section, article {
+  text-indent: 1em;
+}
+
+/* リストアイテムのインデント */
+ul, ol {
+  padding-left: 2em;
+}
+
+li {
+  text-indent: 0;
+  margin-left: 0;
+}
+
+/* 見出しはインデントなし */
+h1, h2, h3, h4, h5, h6 {
+  text-indent: 0;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
