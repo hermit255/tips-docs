@@ -1,15 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { DocFile, MenuItem, buildMenuStructure } from '@/lib/markdown-client'
+import { DocFile, TermFile, MenuItem, buildMenuStructure } from '@/lib/markdown-client'
 
 interface MenuPaneProps {
   docs: DocFile[]
+  terms: TermFile[]
   onDocSelect: (docPath: string) => void
+  onTermSelect: (termSlug: string) => void
   selectedDoc: string | null
+  selectedTerm: string | null
 }
 
-export function MenuPane({ docs, onDocSelect, selectedDoc }: MenuPaneProps) {
+export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, selectedTerm }: MenuPaneProps) {
   const [activeTab, setActiveTab] = useState<'docs' | 'terms'>('docs')
   
   const menuStructure = buildMenuStructure(docs)
@@ -32,6 +35,20 @@ export function MenuPane({ docs, onDocSelect, selectedDoc }: MenuPaneProps) {
           )}
         </div>
         {item.children && item.children.map(child => renderMenuItem(child, level + 1))}
+      </div>
+    )
+  }
+
+  const renderTermItem = (term: TermFile) => {
+    const isSelected = selectedTerm === term.slug
+    
+    return (
+      <div
+        key={term.slug}
+        className={`menu-item ${isSelected ? 'selected' : ''}`}
+        onClick={() => onTermSelect(term.slug)}
+      >
+        <span className="menu-file">📖 {term.title}</span>
       </div>
     )
   }
@@ -63,7 +80,13 @@ export function MenuPane({ docs, onDocSelect, selectedDoc }: MenuPaneProps) {
         {activeTab === 'terms' && (
           <div>
             <h3>用語一覧</h3>
-            <p>用語機能は実装中です</p>
+            {terms.length > 0 ? (
+              <div>
+                {terms.map(renderTermItem)}
+              </div>
+            ) : (
+              <p>用語がありません</p>
+            )}
           </div>
         )}
       </div>

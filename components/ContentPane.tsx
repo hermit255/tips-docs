@@ -31,19 +31,20 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, onTermSelect }: 
     }
   }, [selectedDoc])
 
-  useEffect(() => {
-    if (selectedTerm) {
-      setLoading(true)
-      fetch(`/api/terms/${selectedTerm}`)
-        .then(res => res.json())
-        .then(data => {
-          setTerm(data)
-          setDoc(null)
-        })
-        .catch(err => console.error('Failed to fetch term:', err))
-        .finally(() => setLoading(false))
-    }
-  }, [selectedTerm])
+  // 用語選択時はContentPaneでは何もしない（サブペインで表示するため）
+  // useEffect(() => {
+  //   if (selectedTerm) {
+  //     setLoading(true)
+  //     fetch(`/api/terms/${selectedTerm}`)
+  //       .then(res => res.json())
+  //       .then(data => {
+  //         setTerm(data)
+  //         setDoc(null)
+  //       })
+  //       .catch(err => console.error('Failed to fetch term:', err))
+  //       .finally(() => setLoading(false))
+  //   }
+  // }, [selectedTerm])
 
   const handleTermMouseEnter = (termSlug: string, event: React.MouseEvent) => {
     const termData = terms.find(t => t.slug === termSlug)
@@ -61,6 +62,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, onTermSelect }: 
   }
 
   const handleTermClick = (termSlug: string) => {
+    // 用語選択はするが、コンテンツペインでは用語ページを表示しない
     onTermSelect(termSlug)
     setTooltip(null)
   }
@@ -111,85 +113,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, onTermSelect }: 
     )
   }
 
-  if (term) {
-    return (
-      <div className="content-pane">
-        <h1>{term.title}</h1>
-        <div className="term-content">
-          {term.summary && (
-            <section>
-              <h2>概要</h2>
-              <div dangerouslySetInnerHTML={{ __html: term.summary }} />
-            </section>
-          )}
-          {term.description && (
-            <section>
-              <h2>詳細</h2>
-              <div dangerouslySetInnerHTML={{ __html: term.description }} />
-            </section>
-          )}
-          {term.synonyms && term.synonyms.length > 0 && (
-            <section>
-              <h2>類義語</h2>
-              <ul>
-                {term.synonyms.map((synonym, index) => (
-                  <li key={index}>{synonym}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-          {(term.antonyms && term.antonyms.length > 0) || 
-           (term.siblings && term.siblings.length > 0) || 
-           (term.parents && term.parents.length > 0) || 
-           (term.children && term.children.length > 0) ? (
-            <section>
-              <h2>対比語・部分集合・上位集合</h2>
-              {term.antonyms && term.antonyms.length > 0 && (
-                <div>
-                  <h3>対比語</h3>
-                  <ul>
-                    {term.antonyms.map((antonym, index) => (
-                      <li key={index}>{antonym}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {term.siblings && term.siblings.length > 0 && (
-                <div>
-                  <h3>同列語</h3>
-                  <ul>
-                    {term.siblings.map((sibling, index) => (
-                      <li key={index}>{sibling}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {term.parents && term.parents.length > 0 && (
-                <div>
-                  <h3>上位集合</h3>
-                  <ul>
-                    {term.parents.map((parent, index) => (
-                      <li key={index}>{parent}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {term.children && term.children.length > 0 && (
-                <div>
-                  <h3>部分集合</h3>
-                  <ul>
-                    {term.children.map((child, index) => (
-                      <li key={index}>{child}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </section>
-          ) : null}
-        </div>
-      </div>
-    )
-  }
+  // 用語ページはコンテンツペインでは表示しない（サブペインで表示）
 
   if (doc) {
     const processedHtml = processContentWithTermLinks(doc.html)

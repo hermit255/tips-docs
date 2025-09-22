@@ -14,18 +14,39 @@ export default function Home() {
   
   const { docs, terms, loading } = useMarkdownData()
 
+  const handleDocSelect = (docPath: string) => {
+    setSelectedDoc(docPath)
+    setSelectedTerm(null)
+    setSubPaneTab('toc')
+  }
+
+  const handleTermSelect = (termSlug: string) => {
+    setSelectedTerm(termSlug)
+    // ドキュメント選択はクリアしない（コンテンツペインの状態を保持）
+    setSubPaneTab('preview') // サブペインをプレビュータブに切り替え
+  }
+
+  const handleTermSelectFromMenu = (termSlug: string) => {
+    setSelectedTerm(termSlug)
+    setSelectedDoc(null) // メニューから選択した場合はドキュメント選択をクリア
+    setSubPaneTab('preview') // サブペインをプレビュータブに切り替え
+  }
+
   return (
     <WikiLayout>
       <MenuPane 
         docs={docs}
-        onDocSelect={setSelectedDoc}
+        terms={terms}
+        onDocSelect={handleDocSelect}
+        onTermSelect={handleTermSelectFromMenu}
         selectedDoc={selectedDoc}
+        selectedTerm={selectedTerm}
       />
       <ContentPane 
         selectedDoc={selectedDoc}
         selectedTerm={selectedTerm}
         terms={terms}
-        onTermSelect={setSelectedTerm}
+        onTermSelect={handleTermSelect}
       />
       <SubPane 
         tab={subPaneTab}
