@@ -4,16 +4,19 @@ import { useState, useEffect, useCallback } from 'react'
 import { DocFile, TermFile } from '@/lib/markdown-client'
 import { useFileWatcher } from './useFileWatcher'
 
-export function useMarkdownData() {
+export function useMarkdownData(projectName: string) {
   const [docs, setDocs] = useState<DocFile[]>([])
   const [terms, setTerms] = useState<TermFile[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchData = useCallback(async () => {
+    if (!projectName) return
+    
     try {
+      setLoading(true)
       const [docsResponse, termsResponse] = await Promise.all([
-        fetch('/api/docs'),
-        fetch('/api/terms')
+        fetch(`/api/docs?project=${encodeURIComponent(projectName)}`),
+        fetch(`/api/terms?project=${encodeURIComponent(projectName)}`)
       ])
       
       const docsData = await docsResponse.json()
@@ -26,7 +29,7 @@ export function useMarkdownData() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [projectName])
 
   useEffect(() => {
     fetchData()

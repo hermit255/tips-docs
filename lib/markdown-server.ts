@@ -35,10 +35,8 @@ export interface MenuItem {
   children?: MenuItem[]
 }
 
-const docsDirectory = path.join(process.cwd(), 'docs')
-const termsDirectory = path.join(process.cwd(), 'terms')
-
-export async function getDocFiles(): Promise<DocFile[]> {
+export async function getDocFiles(projectName: string = 'default'): Promise<DocFile[]> {
+  const docsDirectory = path.join(process.cwd(), 'projects', projectName, 'docs')
   const fileNames = getAllMarkdownFiles(docsDirectory)
   const docs = await Promise.all(
     fileNames.map(async (fileName) => {
@@ -66,7 +64,8 @@ export async function getDocFiles(): Promise<DocFile[]> {
   return docs
 }
 
-export async function getTermFiles(): Promise<TermFile[]> {
+export async function getTermFiles(projectName: string = 'default'): Promise<TermFile[]> {
+  const termsDirectory = path.join(process.cwd(), 'projects', projectName, 'terms')
   const fileNames = getAllMarkdownFiles(termsDirectory)
   const terms = await Promise.all(
     fileNames.map(async (fileName) => {

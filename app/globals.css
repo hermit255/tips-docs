@@ -84,6 +84,16 @@ body {
   color: #0051a2;
 }
 
+.doc-link {
+  color: #28a745;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.doc-link:hover {
+  color: #1e7e34;
+}
+
 .tooltip {
   position: absolute;
   background-color: #333;
@@ -94,17 +104,6 @@ body {
   z-index: 1000;
   max-width: 300px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #333 transparent transparent transparent;
 }
 
 .menu-item {

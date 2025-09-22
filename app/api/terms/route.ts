@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getTermFiles } from '@/lib/markdown-server'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const terms = await getTermFiles()
+    const { searchParams } = new URL(request.url)
+    const project = searchParams.get('project') || 'default'
+    
+    const terms = await getTermFiles(project)
     return NextResponse.json(terms)
   } catch (error) {
     console.error('Error fetching terms:', error)

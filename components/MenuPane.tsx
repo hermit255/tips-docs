@@ -3,6 +3,11 @@
 import { useState } from 'react'
 import { DocFile, TermFile, MenuItem, buildMenuStructure } from '@/lib/markdown-client'
 
+interface Project {
+  name: string
+  path: string
+}
+
 interface MenuPaneProps {
   docs: DocFile[]
   terms: TermFile[]
@@ -10,9 +15,12 @@ interface MenuPaneProps {
   onTermSelect: (termSlug: string) => void
   selectedDoc: string | null
   selectedTerm: string | null
+  selectedProject: string
+  projects: Project[]
+  onProjectSelect: (projectName: string) => void
 }
 
-export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, selectedTerm }: MenuPaneProps) {
+export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, selectedTerm, selectedProject, projects, onProjectSelect }: MenuPaneProps) {
   const [activeTab, setActiveTab] = useState<'docs' | 'terms'>('docs')
   
   const menuStructure = buildMenuStructure(docs)
@@ -55,6 +63,37 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
 
   return (
     <div className="menu-pane">
+      <div style={{ 
+        padding: '10px',
+        backgroundColor: '#f5f5f5',
+        borderBottom: '1px solid #ddd'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '10px',
+          marginBottom: '10px'
+        }}>
+          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>プロジェクト:</span>
+          <select 
+            value={selectedProject} 
+            onChange={(e) => onProjectSelect(e.target.value)}
+            style={{
+              padding: '4px 8px',
+              fontSize: '12px',
+              border: '1px solid #ccc',
+              borderRadius: '4px'
+            }}
+          >
+            {projects.map(project => (
+              <option key={project.name} value={project.name}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      
       <div className="tab-container">
         <button
           className={`tab ${activeTab === 'docs' ? 'active' : ''}`}

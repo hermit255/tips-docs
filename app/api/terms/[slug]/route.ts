@@ -6,7 +6,10 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const terms = await getTermFiles()
+    const { searchParams } = new URL(request.url)
+    const project = searchParams.get('project') || 'default'
+    
+    const terms = await getTermFiles(project)
     const term = terms.find(t => t.slug === params.slug)
     
     if (!term) {

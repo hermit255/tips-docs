@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getDocFiles } from '@/lib/markdown-server'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const docs = await getDocFiles()
+    const { searchParams } = new URL(request.url)
+    const project = searchParams.get('project') || 'default'
+    
+    const docs = await getDocFiles(project)
     return NextResponse.json(docs)
   } catch (error) {
     console.error('Error fetching docs:', error)

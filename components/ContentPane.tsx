@@ -8,19 +8,22 @@ interface ContentPaneProps {
   selectedDoc: string | null
   selectedTerm: string | null
   terms: TermFile[]
+  docs: DocFile[]
+  projectName: string
   onTermSelect: (termSlug: string) => void
+  onDocSelect: (docPath: string) => void
 }
 
-export function ContentPane({ selectedDoc, selectedTerm, terms, onTermSelect }: ContentPaneProps) {
+export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectName, onTermSelect, onDocSelect }: ContentPaneProps) {
   const [doc, setDoc] = useState<DocFile | null>(null)
   const [term, setTerm] = useState<TermFile | null>(null)
   const [loading, setLoading] = useState(false)
   const [tooltip, setTooltip] = useState<{term: TermFile, x: number, y: number} | null>(null)
 
   useEffect(() => {
-    if (selectedDoc) {
+    if (selectedDoc && projectName) {
       setLoading(true)
-      fetch(`/api/docs/${selectedDoc}`)
+      fetch(`/api/docs/${selectedDoc}?project=${encodeURIComponent(projectName)}`)
         .then(res => res.json())
         .then(data => {
           setDoc(data)
@@ -29,7 +32,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, onTermSelect }: 
         .catch(err => console.error('Failed to fetch doc:', err))
         .finally(() => setLoading(false))
     }
-  }, [selectedDoc])
+  }, [selectedDoc, projectName])
 
   // 用語選択時はContentPaneでは何もしない（サブペインで表示するため）
   // useEffect(() => {
@@ -67,16 +70,26 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, onTermSelect }: 
     setTooltip(null)
   }
 
-  const processContentWithTermLinks = (html: string) => {
+  const processContentWithLinks = (html: string, docs: DocFile[]) => {
     let processedHtml = html
     
-    // 用語ファイル名と一致するテキストを特殊リンクに変換
+    // 用語ファイル名と一致するテキストを特殊リンクAに変換
     terms.forEach(term => {
       const termName = term.title
       // ##で囲まれたテキストは除外
       const regex = new RegExp(`(?<!##)${termName}(?!##)`, 'g')
       processedHtml = processedHtml.replace(regex, (match) => {
         return `<span class="term-link" data-term="${term.slug}">${match}</span>`
+      })
+    })
+    
+    // ドキュメントファイル名と一致するテキストを特殊リンクBに変換
+    docs.forEach(doc => {
+      const docName = doc.title
+      // ##で囲まれたテキストは除外
+      const regex = new RegExp(`(?<!##)${docName}(?!##)`, 'g')
+      processedHtml = processedHtml.replace(regex, (match) => {
+        return `<span class="doc-link" data-doc="${doc.path}">${match}</span>`
       })
     })
     
@@ -89,6 +102,11 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, onTermSelect }: 
       const termSlug = target.getAttribute('data-term')
       if (termSlug) {
         handleTermClick(termSlug)
+      }
+    } else if (target.classList.contains('doc-link')) {
+      const docPath = target.getAttribute('data-doc')
+      if (docPath) {
+        onDocSelect(docPath)
       }
     }
   }
@@ -116,7 +134,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, onTermSelect }: 
   // 用語ページはコンテンツペインでは表示しない（サブペインで表示）
 
   if (doc) {
-    const processedHtml = processContentWithTermLinks(doc.html)
+    const processedHtml = processContentWithLinks(doc.html, docs)
     
     return (
       <div className="content-pane">

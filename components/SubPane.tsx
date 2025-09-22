@@ -9,15 +9,16 @@ interface SubPaneProps {
   selectedDoc: string | null
   selectedTerm: string | null
   terms: TermFile[]
+  projectName: string
 }
 
-export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms }: SubPaneProps) {
+export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, projectName }: SubPaneProps) {
   const [toc, setToc] = useState<Array<{id: string, text: string, level: number}>>([])
   const [doc, setDoc] = useState<DocFile | null>(null)
 
   useEffect(() => {
-    if (selectedDoc) {
-      fetch(`/api/docs/${selectedDoc}`)
+    if (selectedDoc && projectName) {
+      fetch(`/api/docs/${selectedDoc}?project=${encodeURIComponent(projectName)}`)
         .then(res => res.json())
         .then((data: DocFile) => {
           setDoc(data)
@@ -29,7 +30,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms }: 
       setDoc(null)
       setToc([])
     }
-  }, [selectedDoc])
+  }, [selectedDoc, projectName])
 
   const handleTocClick = (id: string) => {
     const element = document.getElementById(id)
@@ -120,25 +121,25 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms }: 
                         </section>
                       )}
                       
-                      {(term.antonyms && term.antonyms.length > 0) || 
-                       (term.siblings && term.siblings.length > 0) || 
+                      {term.antonyms && term.antonyms.length > 0 && (
+                        <section>
+                          <h2>対義語</h2>
+                          <ul>
+                            {term.antonyms.map((antonym, index) => (
+                              <li key={index}>{antonym}</li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+                      
+                      {(term.siblings && term.siblings.length > 0) || 
                        (term.parents && term.parents.length > 0) || 
                        (term.children && term.children.length > 0) ? (
                         <section>
-                          <h2>対比語・部分集合・上位集合</h2>
-                          {term.antonyms && term.antonyms.length > 0 && (
-                            <div>
-                              <h3>対比語</h3>
-                              <ul>
-                                {term.antonyms.map((antonym, index) => (
-                                  <li key={index}>{antonym}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
+                          <h2>兄弟・親・子</h2>
                           {term.siblings && term.siblings.length > 0 && (
                             <div>
-                              <h3>同列語</h3>
+                              <h3>兄弟</h3>
                               <ul>
                                 {term.siblings.map((sibling, index) => (
                                   <li key={index}>{sibling}</li>
@@ -148,7 +149,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms }: 
                           )}
                           {term.parents && term.parents.length > 0 && (
                             <div>
-                              <h3>上位集合</h3>
+                              <h3>親</h3>
                               <ul>
                                 {term.parents.map((parent, index) => (
                                   <li key={index}>{parent}</li>
@@ -158,7 +159,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms }: 
                           )}
                           {term.children && term.children.length > 0 && (
                             <div>
-                              <h3>部分集合</h3>
+                              <h3>子</h3>
                               <ul>
                                 {term.children.map((child, index) => (
                                   <li key={index}>{child}</li>

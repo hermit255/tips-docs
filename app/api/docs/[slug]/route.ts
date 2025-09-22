@@ -6,7 +6,10 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const docs = await getDocFiles()
+    const { searchParams } = new URL(request.url)
+    const project = searchParams.get('project') || 'default'
+    
+    const docs = await getDocFiles(project)
     const doc = docs.find(d => d.path === params.slug)
     
     if (!doc) {

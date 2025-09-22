@@ -19,22 +19,9 @@ export function TermTooltip({ term, x, y, onClick }: TermTooltipProps) {
       }}
       onClick={onClick}
     >
-      <div>
-        <strong>{term.title}</strong>
-      </div>
       {term.summary && (
         <div style={{ marginTop: '4px', fontSize: '12px' }}>
           {term.summary}
-        </div>
-      )}
-      {term.synonyms && term.synonyms.length > 0 && (
-        <div style={{ marginTop: '4px', fontSize: '12px' }}>
-          <strong>類義語:</strong> {term.synonyms.join(', ')}
-        </div>
-      )}
-      {term.antonyms && term.antonyms.length > 0 && (
-        <div style={{ marginTop: '4px', fontSize: '12px' }}>
-          <strong>対比語:</strong> {term.antonyms.join(', ')}
         </div>
       )}
       <div style={{ marginTop: '4px', fontSize: '10px', color: '#ccc' }}>
