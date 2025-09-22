@@ -36,6 +36,15 @@ h1, h2, h3, h4, h5, h6 {
   text-indent: 0;
 }
 
+/* codeタグのスタイル */
+code {
+  background-color: #ddd;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
