@@ -85,7 +85,6 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
         
         {tab === 'preview' && (
           <div>
-            <h3>用語ページ</h3>
             {selectedTerm ? (
               <div>
                 {(() => {
@@ -98,21 +97,21 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                       
                       {term.summary && (
                         <section>
-                          <h2>概要</h2>
+                          <h3>概要</h3>
                           <div dangerouslySetInnerHTML={{ __html: term.summary }} />
                         </section>
                       )}
                       
                       {term.description && (
                         <section>
-                          <h2>詳細</h2>
+                          <h3>詳細</h3>
                           <div dangerouslySetInnerHTML={{ __html: term.description }} />
                         </section>
                       )}
                       
                       {term.synonyms && term.synonyms.length > 0 && (
                         <section>
-                          <h2>類義語</h2>
+                          <h3>類義語</h3>
                           <ul>
                             {term.synonyms.map((synonym, index) => (
                               <li key={index}>{synonym}</li>
@@ -123,7 +122,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                       
                       {term.antonyms && term.antonyms.length > 0 && (
                         <section>
-                          <h2>対義語</h2>
+                          <h3>対義語</h3>
                           <ul>
                             {term.antonyms.map((antonym, index) => (
                               <li key={index}>{antonym}</li>
@@ -136,7 +135,6 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                        (term.parents && term.parents.length > 0) || 
                        (term.children && term.children.length > 0) ? (
                         <section>
-                          <h2>兄弟・親・子</h2>
                           {term.siblings && term.siblings.length > 0 && (
                             <div>
                               <h3>兄弟</h3>
