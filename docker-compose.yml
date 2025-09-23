@@ -12,3 +12,10 @@ services:
     command: npm run dev
     stdin_open: true
     tty: true
+
+  wiki-static:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production

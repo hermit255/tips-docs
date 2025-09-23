@@ -32,12 +32,18 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
 
   useEffect(() => {
     if (selectedDoc && projectName) {
-      fetch(`/api/docs/${selectedDoc}?project=${encodeURIComponent(projectName)}`)
+      fetch(`/api/${encodeURIComponent(projectName)}-docs.json`)
         .then(res => res.json())
-        .then((data: DocFile) => {
-          setDoc(data)
-          const tocData = extractTocFromHtml(data.html)
-          setToc(tocData)
+        .then((data: DocFile[]) => {
+          const foundDoc = data.find((d: DocFile) => d.path === selectedDoc)
+          if (foundDoc) {
+            setDoc(foundDoc)
+            const tocData = extractTocFromHtml(foundDoc.html)
+            setToc(tocData)
+          } else {
+            setDoc(null)
+            setToc([])
+          }
         })
         .catch(err => console.error('Failed to fetch doc for TOC:', err))
     } else {
