@@ -12,3 +12,16 @@ services:
     command: npm run dev
     stdin_open: true
     tty: true
+
+  wiki-build:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      - ./generate:/app/build-output
+    environment:
+      - NODE_ENV=production
+    command: sh -c "npm run build && cp -r /app/out/* /app/build-output/ && echo 'Build completed successfully'"
+    profiles:
+      - build

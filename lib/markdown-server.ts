@@ -64,10 +64,10 @@ export async function getDocFiles(projectName: string = 'default'): Promise<DocF
       const preprocessedContent = preprocessMarkdown(content)
       
       const processedContent = await remark()
-        .use(remarkGfm)
-        .use(remarkSlug)
-        .use(remarkBreaks)
-        .use(remarkHtml, { sanitize: false })
+        .use(remarkGfm as any)
+        .use(remarkSlug as any)
+        .use(remarkBreaks as any)
+        .use(remarkHtml as any, { sanitize: false })
         .process(preprocessedContent)
       
       const html = processedContent.toString()
@@ -98,10 +98,10 @@ export async function getTermFiles(projectName: string = 'default'): Promise<Ter
       const preprocessedContent = preprocessMarkdown(content)
       
       const processedContent = await remark()
-        .use(remarkGfm)
-        .use(remarkSlug)
-        .use(remarkBreaks)
-        .use(remarkHtml, { sanitize: false })
+        .use(remarkGfm as any)
+        .use(remarkSlug as any)
+        .use(remarkBreaks as any)
+        .use(remarkHtml as any, { sanitize: false })
         .process(preprocessedContent)
       
       const html = processedContent.toString()
@@ -163,10 +163,10 @@ async function parseTermSections(content: string) {
         const sectionContent = currentContent.join('\n').trim()
         // markdownとして処理
         const processedContent = await remark()
-          .use(remarkGfm)
-          .use(remarkSlug)
-          .use(remarkBreaks)
-          .use(remarkHtml, { sanitize: false })
+          .use(remarkGfm as any)
+          .use(remarkSlug as any)
+          .use(remarkBreaks as any)
+          .use(remarkHtml as any, { sanitize: false })
           .process(preprocessMarkdown(sectionContent))
         
         sections[currentSection] = processedContent.toString()
@@ -186,10 +186,10 @@ async function parseTermSections(content: string) {
     const sectionContent = currentContent.join('\n').trim()
     // markdownとして処理
     const processedContent = await remark()
-      .use(remarkGfm)
-      .use(remarkSlug)
-      .use(remarkBreaks)
-      .use(remarkHtml, { sanitize: false })
+      .use(remarkGfm as any)
+      .use(remarkSlug as any)
+      .use(remarkBreaks as any)
+      .use(remarkHtml as any, { sanitize: false })
       .process(preprocessMarkdown(sectionContent))
     
     sections[currentSection] = processedContent.toString()
