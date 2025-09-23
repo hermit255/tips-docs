@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DocFile, TermFile, extractTocFromHtml } from '@/lib/markdown-client'
+import { DocFile, TermFile, extractTocFromHtml, processContentWithLinks } from '@/lib/markdown-client'
 import { TermTooltip } from './TermTooltip'
 
 interface ContentPaneProps {
@@ -70,31 +70,6 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
     setTooltip(null)
   }
 
-  const processContentWithLinks = (html: string, docs: DocFile[]) => {
-    let processedHtml = html
-    
-    // 用語ファイル名と一致するテキストを特殊リンクAに変換
-    terms.forEach(term => {
-      const termName = term.title
-      // ##で囲まれたテキストは除外
-      const regex = new RegExp(`(?<!##)${termName}(?!##)`, 'g')
-      processedHtml = processedHtml.replace(regex, (match) => {
-        return `<span class="term-link" data-term="${term.slug}">${match}</span>`
-      })
-    })
-    
-    // ドキュメントファイル名と一致するテキストを特殊リンクBに変換
-    docs.forEach(doc => {
-      const docName = doc.title
-      // ##で囲まれたテキストは除外
-      const regex = new RegExp(`(?<!##)${docName}(?!##)`, 'g')
-      processedHtml = processedHtml.replace(regex, (match) => {
-        return `<span class="doc-link" data-doc="${doc.path}">${match}</span>`
-      })
-    })
-    
-    return processedHtml
-  }
 
   const handleContentClick = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement
@@ -134,7 +109,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
   // 用語ページはコンテンツペインでは表示しない（サブペインで表示）
 
   if (doc) {
-    const processedHtml = processContentWithLinks(doc.html, docs)
+    const processedHtml = processContentWithLinks(doc.html, terms, docs)
     
     return (
       <div className="content-pane">

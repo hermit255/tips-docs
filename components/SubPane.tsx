@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DocFile, TermFile, extractTocFromHtml } from '@/lib/markdown-client'
+import { DocFile, TermFile, extractTocFromHtml, processContentWithLinks } from '@/lib/markdown-client'
+import { TermTooltip } from './TermTooltip'
 
 interface SubPaneProps {
   tab: 'toc' | 'preview'
@@ -9,12 +10,16 @@ interface SubPaneProps {
   selectedDoc: string | null
   selectedTerm: string | null
   terms: TermFile[]
+  docs: DocFile[]
   projectName: string
+  onTermSelect: (termSlug: string) => void
+  onDocSelect: (docPath: string) => void
 }
 
-export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, projectName }: SubPaneProps) {
+export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, docs, projectName, onTermSelect, onDocSelect }: SubPaneProps) {
   const [toc, setToc] = useState<Array<{id: string, text: string, level: number}>>([])
   const [doc, setDoc] = useState<DocFile | null>(null)
+  const [tooltip, setTooltip] = useState<{term: TermFile, x: number, y: number} | null>(null)
 
   useEffect(() => {
     if (selectedDoc && projectName) {
@@ -36,6 +41,45 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
     const element = document.getElementById(id)
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  const handleTermClick = (termSlug: string) => {
+    onTermSelect(termSlug)
+    setTooltip(null)
+  }
+
+  const handleContentClick = (event: React.MouseEvent) => {
+    const target = event.target as HTMLElement
+    if (target.classList.contains('term-link')) {
+      const termSlug = target.getAttribute('data-term')
+      if (termSlug) {
+        handleTermClick(termSlug)
+      }
+    } else if (target.classList.contains('doc-link')) {
+      const docPath = target.getAttribute('data-doc')
+      if (docPath) {
+        onDocSelect(docPath)
+      }
+    }
+  }
+
+  const handleContentMouseMove = (event: React.MouseEvent) => {
+    const target = event.target as HTMLElement
+    if (target.classList.contains('term-link')) {
+      const termSlug = target.getAttribute('data-term')
+      if (termSlug) {
+        const term = terms.find(t => t.slug === termSlug)
+        if (term) {
+          setTooltip({
+            term,
+            x: event.clientX,
+            y: event.clientY
+          })
+        }
+      }
+    } else {
+      setTooltip(null)
     }
   }
 
@@ -92,20 +136,24 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                   if (!term) return <p>用語が見つかりません</p>
                   
                   return (
-                    <div className="term-page">
+                    <div 
+                      className="term-page"
+                      onClick={handleContentClick}
+                      onMouseMove={handleContentMouseMove}
+                    >
                       <h1>{term.title}</h1>
                       
                       {term.summary && (
                         <section>
                           <h3>概要</h3>
-                          <div dangerouslySetInnerHTML={{ __html: term.summary }} />
+                          <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.summary, terms, docs) }} />
                         </section>
                       )}
                       
                       {term.description && (
                         <section>
                           <h3>詳細</h3>
-                          <div dangerouslySetInnerHTML={{ __html: term.description }} />
+                          <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.description, terms, docs) }} />
                         </section>
                       )}
                       
@@ -114,7 +162,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                           <h3>類義語</h3>
                           <ul>
                             {term.synonyms.map((synonym, index) => (
-                              <li key={index}>{synonym}</li>
+                              <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(synonym, terms, docs) }} />
                             ))}
                           </ul>
                         </section>
@@ -125,7 +173,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                           <h3>対義語</h3>
                           <ul>
                             {term.antonyms.map((antonym, index) => (
-                              <li key={index}>{antonym}</li>
+                              <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(antonym, terms, docs) }} />
                             ))}
                           </ul>
                         </section>
@@ -140,7 +188,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                               <h3>兄弟</h3>
                               <ul>
                                 {term.siblings.map((sibling, index) => (
-                                  <li key={index}>{sibling}</li>
+                                  <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(sibling, terms, docs) }} />
                                 ))}
                               </ul>
                             </div>
@@ -150,7 +198,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                               <h3>親</h3>
                               <ul>
                                 {term.parents.map((parent, index) => (
-                                  <li key={index}>{parent}</li>
+                                  <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(parent, terms, docs) }} />
                                 ))}
                               </ul>
                             </div>
@@ -160,7 +208,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
                               <h3>子</h3>
                               <ul>
                                 {term.children.map((child, index) => (
-                                  <li key={index}>{child}</li>
+                                  <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(child, terms, docs) }} />
                                 ))}
                               </ul>
                             </div>
@@ -177,6 +225,14 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, pr
           </div>
         )}
       </div>
+      {tooltip && (
+        <TermTooltip
+          term={tooltip.term}
+          x={tooltip.x}
+          y={tooltip.y}
+          onClick={() => handleTermClick(tooltip.term.slug)}
+        />
+      )}
     </div>
   )
 }

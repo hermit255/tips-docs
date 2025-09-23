@@ -106,7 +106,10 @@ export default function Home() {
         selectedDoc={selectedDoc}
         selectedTerm={selectedTerm}
         terms={terms}
+        docs={docs}
         projectName={selectedProject}
+        onTermSelect={handleTermSelect}
+        onDocSelect={handleDocSelect}
       />
     </WikiLayout>
   )
