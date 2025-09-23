@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { DocFile, TermFile, extractTocFromHtml, processContentWithLinks } from '@/lib/markdown-client'
 import { TermTooltip } from './TermTooltip'
+import { ResizeHandle } from './ResizeHandle'
+import { useResizable } from '@/hooks/useResizable'
 
 interface SubPaneProps {
   tab: 'toc' | 'preview'
@@ -20,6 +22,13 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
   const [toc, setToc] = useState<Array<{id: string, text: string, level: number}>>([])
   const [doc, setDoc] = useState<DocFile | null>(null)
   const [tooltip, setTooltip] = useState<{term: TermFile, x: number, y: number} | null>(null)
+  
+  const { width, startResize } = useResizable({
+    initialWidth: 300,
+    minWidth: 200,
+    maxWidth: 600,
+    storageKey: 'subpane-width'
+  })
 
   useEffect(() => {
     if (selectedDoc && projectName) {
@@ -97,8 +106,10 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
   }
 
   return (
-    <div className="sub-pane">
-      <div className="tab-container">
+    <div className="sub-pane" style={{ width: `${width}px` }}>
+      <ResizeHandle onMouseDown={startResize} />
+      <div style={{ paddingLeft: '4px' }}>
+        <div className="tab-container">
         <button
           className={`tab ${tab === 'toc' ? 'active' : ''}`}
           onClick={() => onTabChange('toc')}
@@ -236,6 +247,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
             )}
           </div>
         )}
+        </div>
       </div>
       {tooltip && (
         <TermTooltip
