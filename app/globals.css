@@ -30,6 +30,7 @@ p {
 /* リストアイテムのインデント */
 ul, ol {
   padding-left: 2em;
+  margin-bottom: 1em;
 }
 
 li {
@@ -97,6 +98,31 @@ h4:first-child,
 h5:first-child,
 h6:first-child {
   margin-top: 0;
+}
+
+/* pタグやulタグの後に続く見出しタグの上マージンを調整 */
+p + h1, ul + h1, ol + h1 {
+  margin-top: 1.5em;
+}
+
+p + h2, ul + h2, ol + h2 {
+  margin-top: 1.2em;
+}
+
+p + h3, ul + h3, ol + h3 {
+  margin-top: 1em;
+}
+
+p + h4, ul + h4, ol + h4 {
+  margin-top: 0.8em;
+}
+
+p + h5, ul + h5, ol + h5 {
+  margin-top: 0.6em;
+}
+
+p + h6, ul + h6, ol + h6 {
+  margin-top: 0.5em;
 }
 
 /* codeタグのスタイル */
