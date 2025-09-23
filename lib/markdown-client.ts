@@ -108,8 +108,8 @@ function hasKanjiContext(text: string, matchIndex: number, matchLength: number):
   const afterChar = text[matchIndex + matchLength]
   
   // 前後に漢字があるかチェック
-  const hasKanjiBefore = typeof beforeChar === 'string' && isKanji(beforeChar)
-  const hasKanjiAfter = typeof afterChar === 'string' && isKanji(afterChar)
+  const hasKanjiBefore = beforeChar && isKanji(beforeChar)
+  const hasKanjiAfter = afterChar && isKanji(afterChar)
   
   return hasKanjiBefore || hasKanjiAfter
 }
