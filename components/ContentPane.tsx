@@ -24,7 +24,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
     if (selectedDoc && projectName) {
       console.log('ContentPane: Fetching doc with path:', selectedDoc, 'project:', projectName)
       const encodedPath = encodeURIComponent(selectedDoc)
-      const url = `/api/${encodeURIComponent(projectName)}-docs.json`
+      const url = `/api/docs/${encodedPath}?project=${encodeURIComponent(projectName)}`
       console.log('ContentPane: Encoded path:', encodedPath)
       console.log('ContentPane: Full URL:', url)
       setLoading(true)
@@ -38,14 +38,8 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
         })
         .then(data => {
           console.log('ContentPane: Received doc data:', data)
-          const foundDoc = data.find((d: DocFile) => d.path === selectedDoc)
-          if (foundDoc) {
-            setDoc(foundDoc)
-            setTerm(null)
-          } else {
-            console.error('ContentPane: Document not found:', selectedDoc)
-            setDoc(null)
-          }
+          setDoc(data)
+          setTerm(null)
         })
         .catch(err => {
           console.error('ContentPane: Failed to fetch doc:', err)

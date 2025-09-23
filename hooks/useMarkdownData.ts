@@ -15,8 +15,8 @@ export function useMarkdownData(projectName: string) {
     try {
       setLoading(true)
       const [docsResponse, termsResponse] = await Promise.all([
-        fetch(`/api/${encodeURIComponent(projectName)}-docs.json`),
-        fetch(`/api/${encodeURIComponent(projectName)}-terms.json`)
+        fetch(`/api/docs?project=${encodeURIComponent(projectName)}`),
+        fetch(`/api/terms?project=${encodeURIComponent(projectName)}`)
       ])
       
       const docsData = await docsResponse.json()

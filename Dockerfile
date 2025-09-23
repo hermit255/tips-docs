@@ -1,5 +1,4 @@
-# ビルドステージ
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -12,17 +11,8 @@ RUN npm install
 # アプリケーションのソースコードをコピー
 COPY . .
 
-# 静的サイトをビルド
-RUN npm run build
+# ポート3000を公開
+EXPOSE 3000
 
-# 本番用ステージ（nginx）
-FROM nginx:alpine
-
-# ビルドされた静的ファイルをコピー
-COPY --from=builder /app/out /usr/share/nginx/html
-
-# ポート80を公開
-EXPOSE 80
-
-# nginxを起動
-CMD ["nginx", "-g", "daemon off;"]
+# 開発サーバーを起動
+CMD ["npm", "run", "dev"]

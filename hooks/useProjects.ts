@@ -14,9 +14,9 @@ export function useProjects() {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const response = await fetch('/api/projects.json')
+        const response = await fetch('/api/projects')
         const data = await response.json()
-        setProjects(data.map((name: string) => ({ name, path: name })))
+        setProjects(data)
       } catch (error) {
         console.error('Failed to fetch projects:', error)
       } finally {

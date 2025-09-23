@@ -6,7 +6,6 @@ export interface DocFile {
   content: string
   html: string
   path: string
-  frontmatter?: any
 }
 
 export interface TermFile {
@@ -15,7 +14,6 @@ export interface TermFile {
   content: string
   html: string
   path: string
-  frontmatter?: any
   summary?: string
   description?: string
   synonyms?: string[]
@@ -110,8 +108,8 @@ function hasKanjiContext(text: string, matchIndex: number, matchLength: number):
   const afterChar = text[matchIndex + matchLength]
   
   // 前後に漢字があるかチェック
-  const hasKanjiBefore = beforeChar ? isKanji(beforeChar) : false
-  const hasKanjiAfter = afterChar ? isKanji(afterChar) : false
+  const hasKanjiBefore = beforeChar && isKanji(beforeChar)
+  const hasKanjiAfter = afterChar && isKanji(afterChar)
   
   return hasKanjiBefore || hasKanjiAfter
 }
