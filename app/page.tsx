@@ -18,6 +18,7 @@ export default function Home() {
   const { docs, terms, loading } = useMarkdownData(selectedProject)
 
   const handleDocSelect = (docPath: string) => {
+    console.log('Page: handleDocSelect called with path:', docPath)
     setSelectedDoc(docPath)
     setSelectedTerm(null)
     setSubPaneTab('toc')

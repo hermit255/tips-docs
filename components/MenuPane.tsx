@@ -34,7 +34,13 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
         <div
           className={`menu-item ${isSelected ? 'selected' : ''}`}
           style={indentStyle}
-          onClick={() => item.type === 'file' && onDocSelect(item.path)}
+          onClick={() => {
+            if (item.type === 'file') {
+              console.log('MenuPane: Clicking doc with path:', item.path)
+              console.log('MenuPane: Item details:', { name: item.name, path: item.path, type: item.type })
+              onDocSelect(item.path)
+            }
+          }}
         >
           {item.type === 'folder' ? (
             <span className="menu-folder">📁 {item.name}</span>

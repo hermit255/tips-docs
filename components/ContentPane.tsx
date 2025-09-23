@@ -22,14 +22,29 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
 
   useEffect(() => {
     if (selectedDoc && projectName) {
+      console.log('ContentPane: Fetching doc with path:', selectedDoc, 'project:', projectName)
+      const encodedPath = encodeURIComponent(selectedDoc)
+      const url = `/api/docs/${encodedPath}?project=${encodeURIComponent(projectName)}`
+      console.log('ContentPane: Encoded path:', encodedPath)
+      console.log('ContentPane: Full URL:', url)
       setLoading(true)
-      fetch(`/api/docs/${selectedDoc}?project=${encodeURIComponent(projectName)}`)
-        .then(res => res.json())
+      fetch(url)
+        .then(res => {
+          console.log('ContentPane: Response status:', res.status)
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`)
+          }
+          return res.json()
+        })
         .then(data => {
+          console.log('ContentPane: Received doc data:', data)
           setDoc(data)
           setTerm(null)
         })
-        .catch(err => console.error('Failed to fetch doc:', err))
+        .catch(err => {
+          console.error('ContentPane: Failed to fetch doc:', err)
+          setDoc(null)
+        })
         .finally(() => setLoading(false))
     }
   }, [selectedDoc, projectName])
