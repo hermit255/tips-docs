@@ -107,7 +107,7 @@ export async function getTermFiles(projectName: string = 'default'): Promise<Ter
       const html = processedContent.toString()
       
       // 用語ファイルの構造化データを抽出
-      const sections = parseTermSections(content)
+      const sections = await parseTermSections(content)
       
       return {
         slug: fileName.replace(/\.md$/, ''),
@@ -149,7 +149,79 @@ function getAllMarkdownFiles(dir: string): string[] {
   return files
 }
 
-function parseTermSections(content: string) {
+async function parseTermSections(content: string) {
+  const sections: any = {}
+  const lines = content.split('\n')
+  
+  let currentSection = ''
+  let currentContent: string[] = []
+  
+  for (const line of lines) {
+    if (line.startsWith('## ')) {
+      // 前のセクションを保存
+      if (currentSection && currentContent.length > 0) {
+        const sectionContent = currentContent.join('\n').trim()
+        // markdownとして処理
+        const processedContent = await remark()
+          .use(remarkGfm)
+          .use(remarkSlug)
+          .use(remarkBreaks)
+          .use(remarkHtml, { sanitize: false })
+          .process(preprocessMarkdown(sectionContent))
+        
+        sections[currentSection] = processedContent.toString()
+      }
+      
+      // 新しいセクションを開始
+      const sectionName = line.replace('## ', '').toLowerCase()
+      currentSection = sectionName
+      currentContent = []
+    } else if (currentSection) {
+      currentContent.push(line)
+    }
+  }
+  
+  // 最後のセクションを保存
+  if (currentSection && currentContent.length > 0) {
+    const sectionContent = currentContent.join('\n').trim()
+    // markdownとして処理
+    const processedContent = await remark()
+      .use(remarkGfm)
+      .use(remarkSlug)
+      .use(remarkBreaks)
+      .use(remarkHtml, { sanitize: false })
+      .process(preprocessMarkdown(sectionContent))
+    
+    sections[currentSection] = processedContent.toString()
+  }
+  
+  // 特定のセクションを配列として処理（元のテキストから）
+  const originalSections = parseTermSectionsOriginal(content)
+  if (originalSections.synonyms) {
+    const synonymsArray = originalSections.synonyms.split('\n').map((s: string) => s.trim()).filter(Boolean)
+    sections.synonyms = synonymsArray.length > 0 ? synonymsArray : undefined
+  }
+  if (originalSections.antonyms) {
+    const antonymsArray = originalSections.antonyms.split('\n').map((s: string) => s.trim()).filter(Boolean)
+    sections.antonyms = antonymsArray.length > 0 ? antonymsArray : undefined
+  }
+  if (originalSections.siblings) {
+    const siblingsArray = originalSections.siblings.split('\n').map((s: string) => s.trim()).filter(Boolean)
+    sections.siblings = siblingsArray.length > 0 ? siblingsArray : undefined
+  }
+  if (originalSections.parents) {
+    const parentsArray = originalSections.parents.split('\n').map((s: string) => s.trim()).filter(Boolean)
+    sections.parents = parentsArray.length > 0 ? parentsArray : undefined
+  }
+  if (originalSections.children) {
+    const childrenArray = originalSections.children.split('\n').map((s: string) => s.trim()).filter(Boolean)
+    sections.children = childrenArray.length > 0 ? childrenArray : undefined
+  }
+  
+  return sections
+}
+
+function parseTermSectionsOriginal(content: string) {
   const sections: any = {}
   const lines = content.split('\n')
   
@@ -175,23 +247,6 @@ function parseTermSections(content: string) {
   // 最後のセクションを保存
   if (currentSection && currentContent.length > 0) {
     sections[currentSection] = currentContent.join('\n').trim()
-  }
-  
-  // 特定のセクションを配列として処理
-  if (sections.synonyms) {
-    sections.synonyms = sections.synonyms.split('\n').map((s: string) => s.trim()).filter(Boolean)
-  }
-  if (sections.antonyms) {
-    sections.antonyms = sections.antonyms.split('\n').map((s: string) => s.trim()).filter(Boolean)
-  }
-  if (sections.siblings) {
-    sections.siblings = sections.siblings.split('\n').map((s: string) => s.trim()).filter(Boolean)
-  }
-  if (sections.parents) {
-    sections.parents = sections.parents.split('\n').map((s: string) => s.trim()).filter(Boolean)
-  }
-  if (sections.children) {
-    sections.children = sections.children.split('\n').map((s: string) => s.trim()).filter(Boolean)
   }
   
   return sections

@@ -186,31 +186,43 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                           {term.siblings && term.siblings.length > 0 && (
                             <div>
                               <h3>兄弟</h3>
-                              <ul>
-                                {term.siblings.map((sibling, index) => (
-                                  <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(sibling, terms, docs) }} />
-                                ))}
-                              </ul>
+                              {term.siblings.length === 1 ? (
+                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.siblings[0], terms, docs) }} />
+                              ) : (
+                                <ul>
+                                  {term.siblings.map((sibling, index) => (
+                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(sibling, terms, docs) }} />
+                                  ))}
+                                </ul>
+                              )}
                             </div>
                           )}
                           {term.parents && term.parents.length > 0 && (
                             <div>
                               <h3>親</h3>
-                              <ul>
-                                {term.parents.map((parent, index) => (
-                                  <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(parent, terms, docs) }} />
-                                ))}
-                              </ul>
+                              {term.parents.length === 1 ? (
+                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.parents[0], terms, docs) }} />
+                              ) : (
+                                <ul>
+                                  {term.parents.map((parent, index) => (
+                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(parent, terms, docs) }} />
+                                  ))}
+                                </ul>
+                              )}
                             </div>
                           )}
                           {term.children && term.children.length > 0 && (
                             <div>
                               <h3>子</h3>
-                              <ul>
-                                {term.children.map((child, index) => (
-                                  <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(child, terms, docs) }} />
-                                ))}
-                              </ul>
+                              {term.children.length === 1 ? (
+                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.children[0], terms, docs) }} />
+                              ) : (
+                                <ul>
+                                  {term.children.map((child, index) => (
+                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(child, terms, docs) }} />
+                                  ))}
+                                </ul>
+                              )}
                             </div>
                           )}
                         </section>
