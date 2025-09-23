@@ -13,9 +13,31 @@ export default function Home() {
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null)
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null)
   const [subPaneTab, setSubPaneTab] = useState<'toc' | 'preview'>('toc')
+  const [isClient, setIsClient] = useState(false)
   
   const { projects, loading: projectsLoading } = useProjects()
   const { docs, terms, loading } = useMarkdownData(selectedProject)
+
+  // クライアントサイドでのみlocalStorageからプロジェクト選択を読み込み
+  useEffect(() => {
+    setIsClient(true)
+    const lastProject = localStorage.getItem('last-selected-project')
+    if (lastProject) {
+      setSelectedProject(lastProject)
+    }
+  }, [])
+
+  // プロジェクト一覧が読み込まれた後、保存されたプロジェクトが存在しない場合は選択をクリア
+  useEffect(() => {
+    if (isClient && !projectsLoading && projects.length > 0 && selectedProject) {
+      const projectExists = projects.some(project => project.name === selectedProject)
+      if (!projectExists) {
+        console.log('Saved project not found, clearing selection:', selectedProject)
+        setSelectedProject('')
+        localStorage.removeItem('last-selected-project')
+      }
+    }
+  }, [isClient, projects, projectsLoading, selectedProject])
 
   const handleDocSelect = (docPath: string) => {
     console.log('Page: handleDocSelect called with path:', docPath)
@@ -41,6 +63,11 @@ export default function Home() {
     setSelectedDoc(null) // プロジェクト変更時は選択をクリア
     setSelectedTerm(null)
     setSubPaneTab('toc')
+    
+    // 選択したプロジェクトをlocalStorageに保存
+    if (isClient) {
+      localStorage.setItem('last-selected-project', projectName)
+    }
   }
 
   // プロジェクトが選択されていない場合はプロジェクト選択画面を表示
