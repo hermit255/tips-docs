@@ -1,0 +1,18 @@
+{
+  "rules": [
+    {
+      "id": "self-reference",
+      "name": "自ファイル名参照",
+      "description": "自mdファイル名に該当する場合は特殊リンクを設定しない",
+      "enabled": true,
+      "type": "self-reference"
+    },
+    {
+      "id": "kanji-context",
+      "name": "漢字コンテキスト",
+      "description": "該当するワードの前後どちらかに漢字がある場合は特殊リンクを設定しない",
+      "enabled": true,
+      "type": "kanji-context"
+    }
+  ]
+}

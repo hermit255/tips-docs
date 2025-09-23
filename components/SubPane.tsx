@@ -157,14 +157,14 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                       {term.summary && (
                         <section>
                           <h3>概要</h3>
-                          <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.summary, terms, docs) }} />
+                          <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.summary, terms, docs, term.title) }} />
                         </section>
                       )}
                       
                       {term.description && (
                         <section>
                           <h3>詳細</h3>
-                          <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.description, terms, docs) }} />
+                          <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.description, terms, docs, term.title) }} />
                         </section>
                       )}
                       
@@ -173,7 +173,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                           <h3>類義語</h3>
                           <ul>
                             {term.synonyms.map((synonym, index) => (
-                              <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(synonym, terms, docs) }} />
+                              <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(synonym, terms, docs, term.title) }} />
                             ))}
                           </ul>
                         </section>
@@ -184,7 +184,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                           <h3>対義語</h3>
                           <ul>
                             {term.antonyms.map((antonym, index) => (
-                              <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(antonym, terms, docs) }} />
+                              <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(antonym, terms, docs, term.title) }} />
                             ))}
                           </ul>
                         </section>
@@ -198,11 +198,11 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                             <div>
                               <h3>兄弟</h3>
                               {term.siblings.length === 1 ? (
-                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.siblings[0], terms, docs) }} />
+                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.siblings[0], terms, docs, term.title) }} />
                               ) : (
                                 <ul>
                                   {term.siblings.map((sibling, index) => (
-                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(sibling, terms, docs) }} />
+                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(sibling, terms, docs, term.title) }} />
                                   ))}
                                 </ul>
                               )}
@@ -212,11 +212,11 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                             <div>
                               <h3>親</h3>
                               {term.parents.length === 1 ? (
-                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.parents[0], terms, docs) }} />
+                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.parents[0], terms, docs, term.title) }} />
                               ) : (
                                 <ul>
                                   {term.parents.map((parent, index) => (
-                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(parent, terms, docs) }} />
+                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(parent, terms, docs, term.title) }} />
                                   ))}
                                 </ul>
                               )}
@@ -226,11 +226,11 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                             <div>
                               <h3>子</h3>
                               {term.children.length === 1 ? (
-                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.children[0], terms, docs) }} />
+                                <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.children[0], terms, docs, term.title) }} />
                               ) : (
                                 <ul>
                                   {term.children.map((child, index) => (
-                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(child, terms, docs) }} />
+                                    <li key={index} dangerouslySetInnerHTML={{ __html: processContentWithLinks(child, terms, docs, term.title) }} />
                                   ))}
                                 </ul>
                               )}

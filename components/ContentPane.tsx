@@ -109,7 +109,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
   // 用語ページはコンテンツペインでは表示しない（サブペインで表示）
 
   if (doc) {
-    const processedHtml = processContentWithLinks(doc.html, terms, docs)
+    const processedHtml = processContentWithLinks(doc.html, terms, docs, doc.title)
     
     return (
       <div className="content-pane">
