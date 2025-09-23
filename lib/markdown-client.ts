@@ -98,3 +98,29 @@ export function extractTocFromHtml(html: string): Array<{id: string, text: strin
   console.log('Generated TOC:', toc)
   return toc
 }
+
+export function processContentWithLinks(html: string, terms: TermFile[], docs: DocFile[]): string {
+  let processedHtml = html
+  
+  // 用語ファイル名と一致するテキストを特殊リンクAに変換
+  terms.forEach(term => {
+    const termName = term.title
+    // ##で囲まれたテキストは除外
+    const regex = new RegExp(`(?<!##)${termName}(?!##)`, 'g')
+    processedHtml = processedHtml.replace(regex, (match) => {
+      return `<span class="term-link" data-term="${term.slug}">${match}</span>`
+    })
+  })
+  
+  // ドキュメントファイル名と一致するテキストを特殊リンクBに変換
+  docs.forEach(doc => {
+    const docName = doc.title
+    // ##で囲まれたテキストは除外
+    const regex = new RegExp(`(?<!##)${docName}(?!##)`, 'g')
+    processedHtml = processedHtml.replace(regex, (match) => {
+      return `<span class="doc-link" data-doc="${doc.path}">${match}</span>`
+    })
+  })
+  
+  return processedHtml
+}

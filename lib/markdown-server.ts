@@ -5,6 +5,7 @@ import { remark } from 'remark'
 import remarkHtml from 'remark-html'
 import remarkGfm from 'remark-gfm'
 import remarkSlug from 'remark-slug'
+import remarkBreaks from 'remark-breaks'
 
 export interface DocFile {
   slug: string
@@ -36,6 +37,20 @@ export interface MenuItem {
   children?: MenuItem[]
 }
 
+// 改行処理を改善する関数
+function preprocessMarkdown(content: string): string {
+  // 改行処理のオプションを提供
+  // オプション1: 単一改行を段落区切りに変換
+  // オプション2: 単一改行を<br>タグとして保持（remark-breaksで処理）
+  
+  // 現在はオプション2を採用（remark-breaksに任せる）
+  // 必要に応じてオプション1に切り替え可能
+  return content
+    .replace(/\r\n/g, '\n') // Windows改行を統一
+    .replace(/\r/g, '\n')   // Mac改行を統一
+    .replace(/\n{3,}/g, '\n\n') // 3つ以上の連続改行を2つに統一
+}
+
 export async function getDocFiles(projectName: string = 'default'): Promise<DocFile[]> {
   const docsDirectory = path.join(process.cwd(), 'projects', projectName, 'docs')
   const fileNames = getAllMarkdownFiles(docsDirectory)
@@ -45,11 +60,15 @@ export async function getDocFiles(projectName: string = 'default'): Promise<DocF
       const fileContents = fs.readFileSync(fullPath, 'utf8')
       const { data, content } = matter(fileContents)
       
+      // 改行処理を事前に実行
+      const preprocessedContent = preprocessMarkdown(content)
+      
       const processedContent = await remark()
         .use(remarkGfm)
         .use(remarkSlug)
+        .use(remarkBreaks)
         .use(remarkHtml, { sanitize: false })
-        .process(content)
+        .process(preprocessedContent)
       
       const html = processedContent.toString()
       
@@ -75,11 +94,15 @@ export async function getTermFiles(projectName: string = 'default'): Promise<Ter
       const fileContents = fs.readFileSync(fullPath, 'utf8')
       const { data, content } = matter(fileContents)
       
+      // 改行処理を事前に実行
+      const preprocessedContent = preprocessMarkdown(content)
+      
       const processedContent = await remark()
         .use(remarkGfm)
         .use(remarkSlug)
+        .use(remarkBreaks)
         .use(remarkHtml, { sanitize: false })
-        .process(content)
+        .process(preprocessedContent)
       
       const html = processedContent.toString()
       
