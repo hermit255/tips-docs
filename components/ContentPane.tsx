@@ -83,6 +83,9 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
       if (docPath) {
         onDocSelect(docPath)
       }
+    } else {
+      // その他の場所をクリックした場合はtooltipを非表示
+      setTooltip(null)
     }
   }
 
@@ -91,9 +94,13 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
     if (target.classList.contains('term-link')) {
       const termSlug = target.getAttribute('data-term')
       if (termSlug) {
-        handleTermMouseEnter(termSlug, event)
+        // 既にtooltipが表示されている場合は位置を更新しない
+        if (!tooltip) {
+          handleTermMouseEnter(termSlug, event)
+        }
       }
     } else {
+      // term-link以外にマウスが移動した場合はtooltipを非表示
       setTooltip(null)
     }
   }

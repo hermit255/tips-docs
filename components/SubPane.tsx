@@ -70,6 +70,9 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
       if (docPath) {
         onDocSelect(docPath)
       }
+    } else {
+      // その他の場所をクリックした場合はtooltipを非表示
+      setTooltip(null)
     }
   }
 
@@ -78,16 +81,20 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
     if (target.classList.contains('term-link')) {
       const termSlug = target.getAttribute('data-term')
       if (termSlug) {
-        const term = terms.find(t => t.slug === termSlug)
-        if (term) {
-          setTooltip({
-            term,
-            x: event.clientX,
-            y: event.clientY
-          })
+        // 既にtooltipが表示されている場合は位置を更新しない
+        if (!tooltip) {
+          const term = terms.find(t => t.slug === termSlug)
+          if (term) {
+            setTooltip({
+              term,
+              x: event.clientX,
+              y: event.clientY
+            })
+          }
         }
       }
     } else {
+      // term-link以外にマウスが移動した場合はtooltipを非表示
       setTooltip(null)
     }
   }
