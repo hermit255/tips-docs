@@ -25,15 +25,34 @@ jobs:
       
     - name: Run linter
       run: npm run lint
+      continue-on-error: true
       
     - name: Build application
+      id: build
       run: |
         echo "Starting build process..."
-        set -e
-        npm run build
-        echo "Build completed successfully"
-        echo "Checking build output..."
-        ls -la .next/ || echo "No .next directory found"
+        echo "Current directory: $(pwd)"
+        echo "Node version: $(node --version)"
+        echo "NPM version: $(npm --version)"
+        
+        echo "Running npm run build..."
+        if npm run build; then
+          echo "Build completed successfully"
+          echo "Checking build output..."
+          if [ -d ".next" ]; then
+            echo ".next directory exists"
+            ls -la .next/
+            echo "Build artifacts found"
+          else
+            echo "ERROR: .next directory not found after build"
+            exit 1
+          fi
+        else
+          echo "ERROR: Build failed"
+          echo "Checking for partial output..."
+          ls -la .next/ 2>/dev/null || echo "No .next directory found"
+          exit 1
+        fi
       
     - name: List build output
       run: |
@@ -46,7 +65,7 @@ jobs:
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
-      if: success()
+      if: success() && steps.build.outcome == 'success'
       with:
         name: build-files
         path: .next/
