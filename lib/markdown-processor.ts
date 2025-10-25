@@ -17,8 +17,8 @@ export function preprocessMarkdown(content: string): string {
   return content
     .replace(/\r\n/g, '\n')   // Windows改行を統一
     .replace(/\r/g, '\n')     // Mac改行を統一
-    .replace(/\n{3,}/g, '\n\n') // 3つ以上の連続改行を2つに統一
     .replace(/^#\s+.+$/gm, '') // h1タグを除去（重複防止のため）
+    .replace(/\n{3,}/g, '\n\n') // 3つ以上の連続改行を2つに統一
 }
 
 /**
@@ -44,7 +44,10 @@ export async function processMarkdownFile(filePath: string): Promise<{
     .use(remarkHtml, { sanitize: false })
     .process(preprocessedContent)
   
-  const html = processedContent.toString()
+  let html = processedContent.toString()
+  
+  // HTMLレベルでもh1タグを除去（重複防止のため）
+  html = html.replace(/<h1[^>]*>.*?<\/h1>/gi, '')
   
   // h1タグからタイトルを抽出
   const extractH1Title = (content: string): string | null => {
