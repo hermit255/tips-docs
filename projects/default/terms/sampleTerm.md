@@ -1,3 +1,5 @@
+# sampleTerm
+
 ## summary
 この用語の概要です。主にtooltipに表示する用途なので短く纏めましょう
 ## description
