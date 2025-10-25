@@ -6,6 +6,7 @@ interface TermTooltipProps {
   term: TermFile
   linkElement: HTMLElement
   onClick: () => void
+  containerElement?: HTMLElement
 }
 
 // HTMLタグを除去してプレーンテキストに変換する関数（画像は除外）
@@ -74,19 +75,33 @@ function extractSynonymsFromHtml(html: string): string[] {
   return []
 }
 
-export function TermTooltip({ term, linkElement, onClick }: TermTooltipProps) {
+export function TermTooltip({ term, linkElement, onClick, containerElement }: TermTooltipProps) {
   const summary = extractSummaryFromHtml(term.html)
   const synonyms = extractSynonymsFromHtml(term.html)
   
   // リンク要素の位置を取得
   const getTooltipPosition = () => {
-    const rect = linkElement.getBoundingClientRect()
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+    const linkRect = linkElement.getBoundingClientRect()
     
-    return {
-      left: rect.right + scrollLeft + 5, // リンクテキストの終了位置よりやや右
-      top: rect.top + scrollTop // リンクテキストのトップ位置
+    // コンテナ要素が指定されている場合は、その要素を基準に位置を計算
+    if (containerElement) {
+      const containerRect = containerElement.getBoundingClientRect()
+      const containerScrollTop = containerElement.scrollTop || 0
+      const containerScrollLeft = containerElement.scrollLeft || 0
+      
+      return {
+        left: (linkRect.right - containerRect.left) + containerScrollLeft + 5, // コンテナ内での相対位置
+        top: (linkRect.top - containerRect.top) + containerScrollTop // コンテナ内での相対位置
+      }
+    } else {
+      // コンテナが指定されていない場合は、従来通り画面全体を基準に計算
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+      
+      return {
+        left: linkRect.right + scrollLeft + 5, // リンクテキストの終了位置よりやや右
+        top: linkRect.top + scrollTop // リンクテキストのトップ位置
+      }
     }
   }
   

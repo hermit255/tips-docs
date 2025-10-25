@@ -226,6 +226,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
           term={tooltip.term}
           linkElement={tooltip.linkElement}
           onClick={() => handleTermClick(tooltip.term.slug)}
+          containerElement={document.querySelector('.sub-pane') as HTMLElement}
         />
       )}
     </div>
