@@ -54,7 +54,7 @@
 ### 用語ページ仕様
 - termsフォルダ配下のmarkdownを再起的に読み込む
 - markdownをパースした上で再構成したページ
-- markdownのh2をそれぞ概要、詳細、類義語、対義語、兄弟・親・子のh2として表示する
+- markdownのh2 summary,description,synonyms,antonym,sibling,parent,child をそれぞれ概要,詳細,類義語,対義語,兄弟,親,子として置き換えてh2表示する
 #### 読み込まれるmarkdownのフォーマット
 - h1はそのまま表示、未設定の場合"名無し"としてh1表示する
 - h2としてsummary,description,synonyms,antonym,sibling,parent,childを持つ

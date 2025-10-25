@@ -7,6 +7,29 @@ import { TermTooltip } from './TermTooltip'
 import { ResizeHandle } from './ResizeHandle'
 import { useResizable } from '@/hooks/useResizable'
 
+// h2タグを日本語に置き換える関数
+function translateH2Tags(html: string): string {
+  const translations: Record<string, string> = {
+    'summary': '概要',
+    'description': '詳細',
+    'synonyms': '類義語',
+    'antonym': '対義語',
+    'sibling': '兄弟',
+    'parent': '親',
+    'child': '子'
+  }
+  
+  let translatedHtml = html
+  
+  // 各英語のh2タグを日本語に置き換え
+  Object.entries(translations).forEach(([english, japanese]) => {
+    const regex = new RegExp(`<h2[^>]*>\\s*${english}\\s*</h2>`, 'gi')
+    translatedHtml = translatedHtml.replace(regex, `<h2>${japanese}</h2>`)
+  })
+  
+  return translatedHtml
+}
+
 interface SubPaneProps {
   tab: 'toc' | 'preview'
   onTabChange: (tab: 'toc' | 'preview') => void
@@ -210,7 +233,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                       onMouseMove={handleContentMouseMove}
                     >
                       <h1>{term.title}</h1>
-                      <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.html, terms, docs, term.title) }} />
+                      <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(translateH2Tags(term.html), terms, docs, term.title) }} />
                     </div>
                   )
                 })()}
