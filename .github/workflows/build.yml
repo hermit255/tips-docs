@@ -43,14 +43,17 @@ jobs:
             echo ".next directory exists"
             ls -la .next/
             echo "Build artifacts found"
+            echo "build_success=true" >> $GITHUB_OUTPUT
           else
             echo "ERROR: .next directory not found after build"
+            echo "build_success=false" >> $GITHUB_OUTPUT
             exit 1
           fi
         else
           echo "ERROR: Build failed"
           echo "Checking for partial output..."
           ls -la .next/ 2>/dev/null || echo "No .next directory found"
+          echo "build_success=false" >> $GITHUB_OUTPUT
           exit 1
         fi
       
@@ -63,9 +66,23 @@ jobs:
         echo "=== out directory contents ==="
         ls -la out/ || echo "out directory not found"
       
+    - name: Verify build artifacts
+      if: steps.build.outputs.build_success == 'true'
+      run: |
+        echo "Verifying build artifacts before upload..."
+        if [ -d ".next" ]; then
+          echo ".next directory exists"
+          echo "Contents:"
+          ls -la .next/
+          echo "File count: $(find .next -type f | wc -l)"
+        else
+          echo "ERROR: .next directory not found"
+          exit 1
+        fi
+    
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
-      if: success() && steps.build.outcome == 'success'
+      if: steps.build.outputs.build_success == 'true'
       with:
         name: build-files
         path: .next/
