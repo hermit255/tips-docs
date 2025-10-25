@@ -9,12 +9,13 @@ interface TermTooltipProps {
   onClick: () => void
 }
 
-// HTMLタグを除去してプレーンテキストに変換する関数
+// HTMLタグを除去してプレーンテキストに変換する関数（画像は除外）
 function stripHtmlTags(html: string): string {
   if (!html) return ''
   
   return html
-    .replace(/<[^>]*>/g, '') // HTMLタグを除去
+    .replace(/<img[^>]*>/g, '[画像]') // 画像タグを[画像]に置換
+    .replace(/<[^>]*>/g, '') // その他のHTMLタグを除去
     .replace(/&nbsp;/g, ' ') // 非改行スペースを通常のスペースに変換
     .replace(/&amp;/g, '&') // HTMLエンティティを変換
     .replace(/&lt;/g, '<')
@@ -25,6 +26,23 @@ function stripHtmlTags(html: string): string {
     .trim()
 }
 
+// HTMLを安全に表示する関数（画像を含む）
+function renderHtmlSafely(html: string): JSX.Element {
+  if (!html) return <></>
+  
+  // 画像タグのsrc属性を安全に処理
+  const processedHtml = html.replace(/<img([^>]*?)src="([^"]*?)"([^>]*?)>/g, (match, before, src, after) => {
+    // 相対パスの画像をAPIエンドポイント経由に変換
+    if (!src.startsWith('http') && !src.startsWith('/api/')) {
+      const encodedSrc = encodeURIComponent(src)
+      return `<img${before}src="/api/images/${encodedSrc}" style="max-width: 100%; height: auto; max-height: 150px;"${after}>`
+    }
+    return match.replace(/<img/, '<img style="max-width: 100%; height: auto; max-height: 150px;"')
+  })
+  
+  return <div dangerouslySetInnerHTML={{ __html: processedHtml }} />
+}
+
 export function TermTooltip({ term, x, y, onClick }: TermTooltipProps) {
   return (
     <div
@@ -32,12 +50,15 @@ export function TermTooltip({ term, x, y, onClick }: TermTooltipProps) {
       style={{
         left: `${x + 10}px`,
         top: `${y - 10}px`,
+        maxWidth: '300px',
+        maxHeight: '200px',
+        overflow: 'auto',
       }}
       onClick={onClick}
     >
       {term.summary && (
         <div style={{ marginTop: '4px', fontSize: '12px' }}>
-          {stripHtmlTags(term.summary)}
+          {renderHtmlSafely(term.summary)}
         </div>
       )}
       {term.synonyms && term.synonyms.length > 0 && (

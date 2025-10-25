@@ -55,7 +55,7 @@ export const DEFAULT_LINK_EXCEPTION_RULES: LinkExceptionRule[] = [
     id: 'kanji-context',
     name: '漢字コンテキスト',
     description: '該当するワードの前後どちらかに漢字がある場合は特殊リンクを設定しない',
-    enabled: true,
+    enabled: false, // 日本語の特殊リンクには適していないため無効化
     type: 'kanji-context'
   }
 ]
@@ -281,14 +281,28 @@ function processTermsWithPriority(
   
   sortedTerms.forEach(term => {
     const termName = term.title
-    const regex = new RegExp(`(?<!##)${termName}(?!##)`, 'g')
+    // 日本語の文字境界を適切に処理する正規表現
+    // 前後に##がない、かつ前後に日本語文字（ひらがな、カタカナ、漢字）がない場合にマッチ
+    // ただし、助詞（の、を、について、など）が後続する場合は許可
+    const escapedTermName = termName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    
+    // 日本語の特殊リンク用の正規表現
+    // 前後に##がない場合にマッチ
+    // 用語名の後に日本語文字（敬語、助詞など）が続く場合も許可
+    const regex = new RegExp(`(?<!##)${escapedTermName}(?!##)`, 'g')
+    
+    console.log(`Processing term: "${termName}"`)
+    console.log(`Escaped term: "${escapedTermName}"`)
+    console.log(`Regex: ${regex}`)
+    
     let match
     while ((match = regex.exec(processedHtml)) !== null) {
+      console.log(`Found match for "${termName}": "${match[0]}" at position ${match.index}`)
       allMatches.push({
         term,
-        match: match[0],
+        match: termName, // 用語名のみを使用（マッチしたテキスト全体ではなく）
         start: match.index,
-        end: match.index + match[0].length
+        end: match.index + termName.length // 用語名の長さを使用
       })
     }
   })
@@ -342,14 +356,17 @@ function processDocsWithPriority(
   
   sortedDocs.forEach(doc => {
     const docName = doc.title
-    const regex = new RegExp(`(?<!##)${docName}(?!##)`, 'g')
+    // 日本語の文字境界を適切に処理する正規表現
+    // 前後に##がない場合にマッチ
+    // 用語名の後に日本語文字（敬語、助詞など）が続く場合も許可
+    const regex = new RegExp(`(?<!##)${docName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?!##)`, 'g')
     let match
     while ((match = regex.exec(processedHtml)) !== null) {
       allMatches.push({
         doc,
-        match: match[0],
+        match: docName, // ドキュメント名のみを使用（マッチしたテキスト全体ではなく）
         start: match.index,
-        end: match.index + match[0].length
+        end: match.index + docName.length // ドキュメント名の長さを使用
       })
     }
   })

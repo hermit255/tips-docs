@@ -131,7 +131,11 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
   // 用語ページはコンテンツペインでは表示しない（サブペインで表示）
 
   if (doc) {
+    console.log('ContentPane: Processing content with links for doc:', doc.title)
+    console.log('ContentPane: Available terms:', terms.map(t => t.title))
+    console.log('ContentPane: Original HTML:', doc.html)
     const processedHtml = processContentWithLinks(doc.html, terms, docs, doc.title)
+    console.log('ContentPane: Processed HTML:', processedHtml)
     
     return (
       <div className="content-pane">
