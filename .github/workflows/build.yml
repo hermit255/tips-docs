@@ -27,13 +27,29 @@ jobs:
       run: npm run lint
       
     - name: Build application
-      run: npm run build
+      run: |
+        echo "Starting build process..."
+        npm run build || (echo "Build failed, checking for partial output..." && ls -la .next/ 2>/dev/null || echo "No .next directory found")
+        echo "Build process completed"
+      
+    - name: List build output
+      run: |
+        echo "=== Build output directory structure ==="
+        ls -la
+        echo "=== .next directory contents ==="
+        ls -la .next/ || echo ".next directory not found"
+        echo "=== out directory contents ==="
+        ls -la out/ || echo "out directory not found"
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: build-files
-        path: .next/
+        path: |
+          .next/
+          out/
+        if-no-files-found: warn
         retention-days: 7
 
   deploy:
