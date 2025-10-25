@@ -49,7 +49,7 @@ export interface MenuItem {
 export interface LinkExceptionRule {
   id?: string
   name?: string
-  pattern: RegExp
+  pattern?: RegExp
   description: string
   enabled?: boolean
   type?: string

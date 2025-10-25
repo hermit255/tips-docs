@@ -9,7 +9,16 @@ import { DocFile, TermFile, LinkExceptionRule, MenuItem } from '@/types'
 // デフォルトの例外ルール
 export const DEFAULT_LINK_EXCEPTION_RULES: LinkExceptionRule[] = [
   {
+    id: 'self-reference',
+    type: 'self-reference',
+    enabled: true,
+    pattern: undefined,
+    description: '自ファイル名参照の場合は特殊リンクを設定しない'
+  },
+  {
     id: 'kanji-context',
+    type: 'kanji-context',
+    enabled: true,
     pattern: /(?<=[一-龯])[^一-龯]*(?=[一-龯])/g,
     description: '漢字コンテキストでのリンク化を制限'
   }
