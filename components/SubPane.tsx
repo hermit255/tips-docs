@@ -55,7 +55,8 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
     // id属性で見つからない場合は、見出しテキストで検索
     if (!element) {
       const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6')
-      for (const heading of headings) {
+      for (let i = 0; i < headings.length; i++) {
+        const heading = headings[i]
         const headingText = heading.textContent?.trim() || ''
         const headingId = headingText
           .toLowerCase()

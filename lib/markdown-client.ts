@@ -328,7 +328,7 @@ function processTermsWithPriority(
   })
   
   // hタグ内のテキストを一時的に置換して保護
-  const headingPlaceholders: string[] = []
+  const headingPlaceholders: { tag: string; content: string }[] = []
   processedHtml = processedHtml.replace(/<(h[1-6])[^>]*>(.*?)<\/\1>/g, (match, tag, content) => {
     const placeholder = `__HEADING_PLACEHOLDER_${headingPlaceholders.length}__`
     headingPlaceholders.push({ tag, content })
@@ -434,7 +434,7 @@ function processDocsWithPriority(
   })
   
   // hタグ内のテキストを一時的に置換して保護
-  const headingPlaceholders: string[] = []
+  const headingPlaceholders: { tag: string; content: string }[] = []
   processedHtml = processedHtml.replace(/<(h[1-6])[^>]*>(.*?)<\/\1>/g, (match, tag, content) => {
     const placeholder = `__HEADING_PLACEHOLDER_${headingPlaceholders.length}__`
     headingPlaceholders.push({ tag, content })

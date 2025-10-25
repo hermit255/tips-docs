@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getProjects } from '@/lib/projects'
 
+// 動的ルートとして明示的に指定
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const projects = getProjects()

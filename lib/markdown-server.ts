@@ -66,7 +66,7 @@ export async function getDocFiles(projectName: string = 'default'): Promise<DocF
       
       const processedContent = await remark()
         .use(remarkGfm)
-        .use(remarkSlug)
+        .use(remarkSlug as any)
         .use(remarkBreaks)
         .use(remarkHtml, { sanitize: false })
         .process(preprocessedContent)
@@ -74,7 +74,7 @@ export async function getDocFiles(projectName: string = 'default'): Promise<DocF
       const html = processedContent.toString()
       
       // h1タグからタイトルを抽出する関数
-      const extractH1Title = (content: string): string => {
+      const extractH1Title = (content: string): string | null => {
         const h1Match = content.match(/^#\s+(.+)$/m)
         return h1Match ? h1Match[1].trim() : null
       }
@@ -109,7 +109,7 @@ export async function getTermFiles(projectName: string = 'default'): Promise<Ter
       
       const processedContent = await remark()
         .use(remarkGfm)
-        .use(remarkSlug)
+        .use(remarkSlug as any)
         .use(remarkBreaks)
         .use(remarkHtml, { sanitize: false })
         .process(preprocessedContent)
@@ -117,7 +117,7 @@ export async function getTermFiles(projectName: string = 'default'): Promise<Ter
       const html = processedContent.toString()
       
       // h1タグからタイトルを抽出する関数
-      const extractH1Title = (content: string): string => {
+      const extractH1Title = (content: string): string | null => {
         const h1Match = content.match(/^#\s+(.+)$/m)
         return h1Match ? h1Match[1].trim() : null
       }
@@ -183,7 +183,7 @@ async function parseTermSections(content: string) {
         // markdownとして処理
         const processedContent = await remark()
           .use(remarkGfm)
-          .use(remarkSlug)
+          .use(remarkSlug as any)
           .use(remarkBreaks)
           .use(remarkHtml, { sanitize: false })
           .process(preprocessMarkdown(sectionContent))
@@ -206,7 +206,7 @@ async function parseTermSections(content: string) {
     // markdownとして処理
     const processedContent = await remark()
       .use(remarkGfm)
-      .use(remarkSlug)
+      .use(remarkSlug as any)
       .use(remarkBreaks)
       .use(remarkHtml, { sanitize: false })
       .process(preprocessMarkdown(sectionContent))

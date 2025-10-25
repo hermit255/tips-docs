@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { loadLinkSettings, saveLinkSettings } from '@/lib/link-settings'
 import { LinkSettings } from '@/lib/markdown-client'
 
+// 動的ルートとして明示的に指定
+export const dynamic = 'force-dynamic'
+
 // 設定を取得
 export async function GET() {
   try {

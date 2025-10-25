@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 
+// 動的ルートとして明示的に指定
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { path: string[] } }

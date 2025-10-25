@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { fileWatcher } from '@/lib/fileWatcher'
 
+// 動的ルートとして明示的に指定
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   const encoder = new TextEncoder()
   

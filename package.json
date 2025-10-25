@@ -28,5 +28,8 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.0",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.3.2"
   }
 }
