@@ -319,6 +319,14 @@ function processTermsWithPriority(
     return `="${placeholder}"`
   })
   
+  // hタグ内のテキストを一時的に置換して保護
+  const headingPlaceholders: string[] = []
+  processedHtml = processedHtml.replace(/<(h[1-6])[^>]*>(.*?)<\/\1>/g, (match, tag, content) => {
+    const placeholder = `__HEADING_PLACEHOLDER_${headingPlaceholders.length}__`
+    headingPlaceholders.push({ tag, content })
+    return `<${tag}>${placeholder}</${tag}>`
+  })
+  
   // デバッグ用ログ
   console.log('Processing terms with priority:', sortedTerms.map(t => t.title))
   
@@ -388,6 +396,12 @@ function processTermsWithPriority(
     processedHtml = before + replacement + after
   })
   
+  // hタグの内容を元に戻す
+  headingPlaceholders.forEach(({ tag, content }, index) => {
+    const placeholder = `__HEADING_PLACEHOLDER_${index}__`
+    processedHtml = processedHtml.replace(placeholder, content)
+  })
+  
   // 属性値を元に戻す
   attributePlaceholders.forEach((content, index) => {
     const placeholder = `__ATTR_PLACEHOLDER_${index}__`
@@ -409,6 +423,14 @@ function processDocsWithPriority(
     const placeholder = `__ATTR_PLACEHOLDER_${attributePlaceholders.length}__`
     attributePlaceholders.push(content)
     return `="${placeholder}"`
+  })
+  
+  // hタグ内のテキストを一時的に置換して保護
+  const headingPlaceholders: string[] = []
+  processedHtml = processedHtml.replace(/<(h[1-6])[^>]*>(.*?)<\/\1>/g, (match, tag, content) => {
+    const placeholder = `__HEADING_PLACEHOLDER_${headingPlaceholders.length}__`
+    headingPlaceholders.push({ tag, content })
+    return `<${tag}>${placeholder}</${tag}>`
   })
   
   // すべてのドキュメントのマッチを検索して、長い名前を優先して処理
@@ -456,6 +478,12 @@ function processDocsWithPriority(
     const replacement = `<span class="doc-link" data-doc="${doc.path}">${match}</span>`
     
     processedHtml = before + replacement + after
+  })
+  
+  // hタグの内容を元に戻す
+  headingPlaceholders.forEach(({ tag, content }, index) => {
+    const placeholder = `__HEADING_PLACEHOLDER_${index}__`
+    processedHtml = processedHtml.replace(placeholder, content)
   })
   
   // 属性値を元に戻す
