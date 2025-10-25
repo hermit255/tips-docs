@@ -40,9 +40,27 @@ async function loadStaticData(): Promise<StaticData> {
   }
   
   try {
-    // GitHub Pagesのベースパスを動的に取得
-    const basePath = typeof window !== 'undefined' && window.location.pathname.includes('/tips-docs') ? '/tips-docs' : ''
-    const response = await fetch(`${basePath}/data/projects.json`)
+    // 環境に応じてデータソースを決定
+    let dataUrl = ''
+    if (typeof window !== 'undefined') {
+      // ブラウザ環境では、URLパスから判定
+      if (window.location.pathname.includes('/tips-docs')) {
+        // GitHub Pages環境
+        dataUrl = '/tips-docs/data/projects.json'
+      } else {
+        // ローカル環境ではAPIルートを使用
+        dataUrl = '/api/projects'
+      }
+    } else {
+      // サーバー環境では、環境変数から判定
+      if (process.env.NODE_ENV === 'production' && process.env.GITHUB_ACTIONS) {
+        dataUrl = '/tips-docs/data/projects.json'
+      } else {
+        dataUrl = '/api/projects'
+      }
+    }
+    
+    const response = await fetch(dataUrl)
     if (!response.ok) {
       throw new Error(`Failed to load data: ${response.status}`)
     }

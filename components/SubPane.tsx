@@ -32,9 +32,24 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
 
   useEffect(() => {
     if (selectedDoc && projectName) {
-      // 静的データを読み込み
-      import('@/lib/markdown-client-static').then(({ getDocFiles }) => {
-        getDocFiles(projectName).then(docs => {
+      const loadDoc = async () => {
+        try {
+          let docs: DocFile[] = []
+          
+          if (typeof window !== 'undefined' && window.location.pathname.includes('/tips-docs')) {
+            // GitHub Pages環境では静的データを使用
+            const { getDocFiles } = await import('@/lib/markdown-client-static')
+            docs = await getDocFiles(projectName)
+          } else {
+            // ローカル環境ではAPIルートを使用
+            const response = await fetch(`/api/docs?project=${encodeURIComponent(projectName)}`)
+            if (response.ok) {
+              docs = await response.json()
+            } else {
+              throw new Error('Failed to fetch docs from API')
+            }
+          }
+          
           const doc = docs.find(d => d.path === selectedDoc)
           if (doc) {
             setDoc(doc)
@@ -44,8 +59,14 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
             setDoc(null)
             setToc([])
           }
-        }).catch(err => console.error('Failed to load doc for TOC:', err))
-      })
+        } catch (err) {
+          console.error('Failed to load doc for TOC:', err)
+          setDoc(null)
+          setToc([])
+        }
+      }
+      
+      loadDoc()
     } else {
       setDoc(null)
       setToc([])

@@ -52,6 +52,23 @@ function preprocessMarkdown(content: string): string {
     .replace(/^#\s+.+$/gm, '') // h1タグを除去（重複防止のため）
 }
 
+export async function getProjects(): Promise<Array<{name: string, path: string}>> {
+  const projectsDirectory = path.join(process.cwd(), 'projects')
+  
+  if (!fs.existsSync(projectsDirectory)) {
+    return []
+  }
+  
+  const projectNames = fs.readdirSync(projectsDirectory, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => ({
+      name: dirent.name,
+      path: dirent.name
+    }))
+  
+  return projectNames
+}
+
 export async function getDocFiles(projectName: string = 'default'): Promise<DocFile[]> {
   const docsDirectory = path.join(process.cwd(), 'projects', projectName, 'docs')
   const fileNames = getAllMarkdownFiles(docsDirectory)
@@ -87,7 +104,7 @@ export async function getDocFiles(projectName: string = 'default'): Promise<DocF
         title,
         content,
         html,
-        path: fileName
+        path: fileName.replace(/\.md$/, '')
       }
     })
   )
@@ -133,7 +150,7 @@ export async function getTermFiles(projectName: string = 'default'): Promise<Ter
         title,
         content,
         html,
-        path: fileName,
+        path: fileName.replace(/\.md$/, ''),
         ...sections
       }
     })

@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // GitHub Pages用の静的エクスポート設定
-  output: 'export',
-  trailingSlash: true,
-  basePath: '/tips-docs',
-  assetPrefix: '/tips-docs',
+  // 基本設定
   images: {
     unoptimized: true
   },
@@ -15,6 +11,14 @@ const nextConfig = {
     }
     return config
   },
+}
+
+// GitHub Pages用の設定（本番環境のみ）
+if (process.env.NODE_ENV === 'production' && process.env.GITHUB_ACTIONS) {
+  nextConfig.output = 'export'
+  nextConfig.trailingSlash = true
+  nextConfig.basePath = '/tips-docs'
+  nextConfig.assetPrefix = '/tips-docs'
 }
 
 module.exports = nextConfig

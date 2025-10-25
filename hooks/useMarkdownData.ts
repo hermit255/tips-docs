@@ -14,11 +14,33 @@ export function useMarkdownData(projectName: string) {
     
     try {
       setLoading(true)
-      // 静的データを読み込み
-      const [docsData, termsData] = await Promise.all([
-        getDocFiles(projectName),
-        getTermFiles(projectName)
-      ])
+      
+      // 環境に応じてデータソースを決定
+      let docsData: DocFile[] = []
+      let termsData: TermFile[] = []
+      
+      if (typeof window !== 'undefined' && window.location.pathname.includes('/tips-docs')) {
+        // GitHub Pages環境では静的データを使用
+        const [docsResult, termsResult] = await Promise.all([
+          getDocFiles(projectName),
+          getTermFiles(projectName)
+        ])
+        docsData = docsResult
+        termsData = termsResult
+      } else {
+        // ローカル環境ではAPIルートを使用
+        const [docsResponse, termsResponse] = await Promise.all([
+          fetch(`/api/docs?project=${encodeURIComponent(projectName)}`),
+          fetch(`/api/terms?project=${encodeURIComponent(projectName)}`)
+        ])
+        
+        if (docsResponse.ok && termsResponse.ok) {
+          docsData = await docsResponse.json()
+          termsData = await termsResponse.json()
+        } else {
+          throw new Error('Failed to fetch data from API')
+        }
+      }
       
       setDocs(docsData)
       setTerms(termsData)
