@@ -110,16 +110,29 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
 
   const handleContentMouseMove = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement
-    if (target.classList.contains('term-link')) {
-      const termPath = target.getAttribute('data-term')
+    
+    // tooltip自体の上にマウスがある場合は何もしない
+    if (target.closest('.tooltip')) {
+      return
+    }
+    
+    // 特殊リンク（term-link）の範囲内かどうかを判定
+    const isOverTermLink = target.classList.contains('term-link') || 
+                          target.closest('.term-link') !== null
+    
+    if (isOverTermLink) {
+      const termLinkElement = target.classList.contains('term-link') ? 
+                             target : target.closest('.term-link') as HTMLElement
+      const termPath = termLinkElement?.getAttribute('data-term')
+      
       if (termPath) {
         // 既にtooltipが表示されている場合は位置を更新しない
         if (!tooltip) {
-          handleTermMouseEnter(termPath, target)
+          handleTermMouseEnter(termPath, termLinkElement)
         }
       }
     } else {
-      // term-link以外にマウスが移動した場合はtooltipを非表示
+      // 特殊リンクの範囲外にマウスが移動した場合はtooltipを非表示
       setTooltip(null)
     }
   }

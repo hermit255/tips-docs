@@ -120,6 +120,8 @@ export function TermTooltip({ term, linkElement, onClick, containerElement }: Te
         zIndex: 1000,
       }}
       onClick={onClick}
+      onMouseEnter={(e) => e.stopPropagation()}
+      onMouseLeave={(e) => e.stopPropagation()}
     >
       {summary && (
         <div style={{ marginTop: '4px', fontSize: '12px' }}>
