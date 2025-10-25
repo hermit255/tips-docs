@@ -154,7 +154,6 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
             term={tooltip.term}
             linkElement={tooltip.linkElement}
             onClick={() => handleTermClick(tooltip.term.slug)}
-            containerElement={document.querySelector('.content-pane') as HTMLElement}
           />
         )}
       </div>
