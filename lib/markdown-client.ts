@@ -153,7 +153,7 @@ export function buildMenuStructure(docs: DocFile[]): MenuItem[] {
         const menuItem: MenuItem = {
           title: isFile ? doc.title : part.replace(/\.md$/, ''),
           path: currentPath,
-          type: isFile ? 'doc' : 'term',
+          type: isFile ? 'doc' : 'doc', // フォルダも'doc'タイプとして扱う
           children: isFile ? undefined : []
         }
         

@@ -35,46 +35,69 @@ function getDocFiles(projectName) {
     return []
   }
   
-  const files = fs.readdirSync(projectDir)
-    .filter(file => file.endsWith('.md'))
-    .map(file => {
-      const filePath = path.join(projectDir, file)
-      const fileContents = fs.readFileSync(filePath, 'utf8')
-      const { data, content } = matter(fileContents)
+  // 再帰的にmarkdownファイルを取得
+  function getAllMarkdownFiles(dir, relativePath = '') {
+    const files = []
+    
+    function scanDirectory(currentDir, currentRelativePath = '') {
+      const items = fs.readdirSync(currentDir, { withFileTypes: true })
       
-      // 改行処理を事前に実行
-      const preprocessedContent = preprocessMarkdown(content)
-      
-      // markdownとして処理
-      const processedContent = remark()
-        .use(remarkGfm)
-        .use(remarkSlug)
-        .use(remarkBreaks)
-        .use(remarkHtml, { sanitize: false })
-        .processSync(preprocessedContent)
-      
-      let html = processedContent.toString()
-      
-      // HTMLレベルでもh1タグを除去（重複防止のため）
-      html = html.replace(/<h1[^>]*>.*?<\/h1>/gi, '')
-      
-      // h1タグからタイトルを抽出する関数
-      const extractH1Title = (content) => {
-        const h1Match = content.match(/^#\s+(.+)$/m)
-        return h1Match ? h1Match[1].trim() : null
+      for (const item of items) {
+        const itemPath = path.join(currentDir, item.name)
+        const itemRelativePath = currentRelativePath ? path.join(currentRelativePath, item.name) : item.name
+        
+        if (item.isDirectory()) {
+          scanDirectory(itemPath, itemRelativePath)
+        } else if (item.isFile() && item.name.endsWith('.md')) {
+          files.push(itemRelativePath)
+        }
       }
-      
-      const h1Title = extractH1Title(content)
-      const title = data.title || h1Title || file.replace('.md', '')
-      
-      return {
-        slug: file.replace('.md', ''),
-        title,
-        content,
-        html,
-        path: file.replace('.md', '')
-      }
-    })
+    }
+    
+    scanDirectory(dir, relativePath)
+    return files
+  }
+  
+  const markdownFiles = getAllMarkdownFiles(projectDir)
+  
+  const files = markdownFiles.map(file => {
+    const filePath = path.join(projectDir, file)
+    const fileContents = fs.readFileSync(filePath, 'utf8')
+    const { data, content } = matter(fileContents)
+    
+    // 改行処理を事前に実行
+    const preprocessedContent = preprocessMarkdown(content)
+    
+    // markdownとして処理
+    const processedContent = remark()
+      .use(remarkGfm)
+      .use(remarkSlug)
+      .use(remarkBreaks)
+      .use(remarkHtml, { sanitize: false })
+      .processSync(preprocessedContent)
+    
+    let html = processedContent.toString()
+    
+    // HTMLレベルでもh1タグを除去（重複防止のため）
+    html = html.replace(/<h1[^>]*>.*?<\/h1>/gi, '')
+    
+    // h1タグからタイトルを抽出する関数
+    const extractH1Title = (content) => {
+      const h1Match = content.match(/^#\s+(.+)$/m)
+      return h1Match ? h1Match[1].trim() : null
+    }
+    
+    const h1Title = extractH1Title(content)
+    const title = data.title || h1Title || path.basename(file, '.md')
+    
+    return {
+      slug: file.replace('.md', ''),
+      title,
+      content,
+      html,
+      path: file.replace('.md', '')
+    }
+  })
   
   return files
 }

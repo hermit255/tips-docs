@@ -27,6 +27,7 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
   const renderMenuItem = (item: MenuItem, level: number = 0) => {
     const isSelected = selectedDoc === item.path
     const indentStyle = { paddingLeft: `${level * 20}px` }
+    const isFolder = item.children && item.children.length > 0
     
     return (
       <div key={item.path}>
@@ -34,7 +35,7 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
           className={`menu-item ${isSelected ? 'selected' : ''}`}
           style={indentStyle}
           onClick={() => {
-            if (item.type === 'doc') {
+            if (item.type === 'doc' && !isFolder) {
               console.log('MenuPane: Clicking doc with path:', item.path)
               console.log('MenuPane: Item details:', { name: item.name, path: item.path, type: item.type })
               onDocSelect(item.path)
@@ -44,7 +45,9 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
           {item.type === 'term' ? (
             <span className="menu-term">📄 {item.title}</span>
           ) : (
-            <span className="menu-doc">📄 {item.title}</span>
+            <span className="menu-doc">
+              {isFolder ? '📁' : '📄'} {item.title}
+            </span>
           )}
         </div>
         {item.children && item.children.map(child => renderMenuItem(child, level + 1))}
