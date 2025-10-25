@@ -13,6 +13,33 @@
 - `docker compose up` すればNext.jsでサーバーが起動する。http://localhost:3000 から閲覧可能
 - プロジェクト単位でドキュメントが管理でき、`projects/{projectName}/docs`(ドキュメントファイル) `projects/{projectName}/terms`(用語ファイル)を元にサービス内でビルドされる
 
+## GitHub Pages デプロイ
+
+このアプリケーションはGitHub Pagesで静的サイトとしてデプロイできます。
+
+### 設定手順
+
+1. **GitHub Pagesの設定**:
+   - リポジトリの Settings > Pages に移動
+   - Source を "GitHub Actions" に設定
+
+2. **自動デプロイ**:
+   - mainブランチにプッシュすると自動的にデプロイされます
+   - GitHub Actionsでビルドとデプロイが実行されます
+
+3. **アクセス**:
+   - `https://{username}.github.io/{repository-name}` でアクセス可能
+
+### ローカル開発
+
+```bash
+# 開発サーバー起動
+docker compose up
+
+# 静的ビルド（GitHub Pages用）
+npm run build
+```
+
 ## 備考
 - AIコーディングの実験として作ったものなので、ファイル名の日本語対応やフォルダの複層化でエラーが起きるケースがある課題は残っている
 - wikipediaのリンクのような注釈での関連情報の見やすさを目指した
