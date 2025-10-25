@@ -129,6 +129,46 @@ function isKanji(char: string): boolean {
   )
 }
 
+// HTMLの属性値内かどうかを判定する関数
+function isInsideHtmlAttribute(html: string, position: number): boolean {
+  // 指定位置より前の文字列を取得
+  const beforePosition = html.substring(0, position)
+  
+  // 最後のタグの開始位置を探す
+  const lastTagStart = beforePosition.lastIndexOf('<')
+  const lastTagEnd = beforePosition.lastIndexOf('>')
+  
+  // タグ内にいるかチェック
+  if (lastTagStart > lastTagEnd) {
+    // タグ内の属性を解析
+    const tagContent = beforePosition.substring(lastTagStart)
+    
+    // 属性値の開始位置を探す（=の後）
+    const equalsIndex = tagContent.lastIndexOf('=')
+    if (equalsIndex === -1) return false
+    
+    // 属性値の開始文字を探す
+    const afterEquals = tagContent.substring(equalsIndex + 1)
+    const quoteIndex = afterEquals.search(/["']/)
+    if (quoteIndex === -1) return false
+    
+    const quoteChar = afterEquals[quoteIndex]
+    const attributeValueStart = lastTagStart + equalsIndex + 1 + quoteIndex
+    
+    // 属性値の終了位置を探す
+    const afterQuote = afterEquals.substring(quoteIndex + 1)
+    const endQuoteIndex = afterQuote.indexOf(quoteChar)
+    if (endQuoteIndex === -1) return false
+    
+    const attributeValueEnd = attributeValueStart + 1 + endQuoteIndex
+    
+    // 指定位置が属性値内にあるかチェック
+    return position >= attributeValueStart + 1 && position <= attributeValueEnd
+  }
+  
+  return false
+}
+
 export interface MenuItem {
   name: string
   path: string
@@ -271,7 +311,13 @@ function processTermsWithPriority(
   currentFileName: string, 
   exceptionRules: LinkExceptionRule[]
 ): string {
-  let processedHtml = html
+  // HTMLの属性値を一時的に置換して保護
+  const attributePlaceholders: string[] = []
+  let processedHtml = html.replace(/="([^"]*)"/g, (match, content) => {
+    const placeholder = `__ATTR_PLACEHOLDER_${attributePlaceholders.length}__`
+    attributePlaceholders.push(content)
+    return `="${placeholder}"`
+  })
   
   // デバッグ用ログ
   console.log('Processing terms with priority:', sortedTerms.map(t => t.title))
@@ -298,6 +344,8 @@ function processTermsWithPriority(
     let match
     while ((match = regex.exec(processedHtml)) !== null) {
       console.log(`Found match for "${termName}": "${match[0]}" at position ${match.index}`)
+      
+      
       allMatches.push({
         term,
         match: termName, // 用語名のみを使用（マッチしたテキスト全体ではなく）
@@ -340,6 +388,12 @@ function processTermsWithPriority(
     processedHtml = before + replacement + after
   })
   
+  // 属性値を元に戻す
+  attributePlaceholders.forEach((content, index) => {
+    const placeholder = `__ATTR_PLACEHOLDER_${index}__`
+    processedHtml = processedHtml.replace(placeholder, content)
+  })
+  
   return processedHtml
 }
 
@@ -349,7 +403,13 @@ function processDocsWithPriority(
   currentFileName: string, 
   exceptionRules: LinkExceptionRule[]
 ): string {
-  let processedHtml = html
+  // HTMLの属性値を一時的に置換して保護
+  const attributePlaceholders: string[] = []
+  let processedHtml = html.replace(/="([^"]*)"/g, (match, content) => {
+    const placeholder = `__ATTR_PLACEHOLDER_${attributePlaceholders.length}__`
+    attributePlaceholders.push(content)
+    return `="${placeholder}"`
+  })
   
   // すべてのドキュメントのマッチを検索して、長い名前を優先して処理
   const allMatches: Array<{doc: DocFile, match: string, start: number, end: number}> = []
@@ -362,6 +422,7 @@ function processDocsWithPriority(
     const regex = new RegExp(`(?<!##)${docName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?!##)`, 'g')
     let match
     while ((match = regex.exec(processedHtml)) !== null) {
+      
       allMatches.push({
         doc,
         match: docName, // ドキュメント名のみを使用（マッチしたテキスト全体ではなく）
@@ -395,6 +456,12 @@ function processDocsWithPriority(
     const replacement = `<span class="doc-link" data-doc="${doc.path}">${match}</span>`
     
     processedHtml = before + replacement + after
+  })
+  
+  // 属性値を元に戻す
+  attributePlaceholders.forEach((content, index) => {
+    const placeholder = `__ATTR_PLACEHOLDER_${index}__`
+    processedHtml = processedHtml.replace(placeholder, content)
   })
   
   return processedHtml
