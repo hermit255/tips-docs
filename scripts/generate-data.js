@@ -53,7 +53,10 @@ function getDocFiles(projectName) {
         .use(remarkHtml, { sanitize: false })
         .processSync(preprocessedContent)
       
-      const html = processedContent.toString()
+      let html = processedContent.toString()
+      
+      // HTMLレベルでもh1タグを除去（重複防止のため）
+      html = html.replace(/<h1[^>]*>.*?<\/h1>/gi, '')
       
       // h1タグからタイトルを抽出する関数
       const extractH1Title = (content) => {
@@ -101,7 +104,10 @@ function getTermFiles(projectName) {
         .use(remarkHtml, { sanitize: false })
         .processSync(preprocessedContent)
       
-      const html = processedContent.toString()
+      let html = processedContent.toString()
+      
+      // HTMLレベルでもh1タグを除去（重複防止のため）
+      html = html.replace(/<h1[^>]*>.*?<\/h1>/gi, '')
       
       // h1タグからタイトルを抽出する関数
       const extractH1Title = (content) => {
