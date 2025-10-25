@@ -16,11 +16,6 @@ body {
   background: #ffffff;
 }
 
-/* 見出し以外のインデント */
-p, div, span, section, article {
-  text-indent: 1em;
-}
-
 /* 段落の下マージン設定 */
 p {
   margin-bottom: 1em;
