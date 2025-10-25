@@ -3,6 +3,8 @@ const nextConfig = {
   // GitHub Pages用の静的エクスポート設定
   output: 'export',
   trailingSlash: true,
+  basePath: '/tips-docs',
+  assetPrefix: '/tips-docs',
   images: {
     unoptimized: true
   },

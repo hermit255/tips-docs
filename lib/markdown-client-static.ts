@@ -40,7 +40,9 @@ async function loadStaticData(): Promise<StaticData> {
   }
   
   try {
-    const response = await fetch('/data/projects.json')
+    // GitHub Pagesのベースパスを動的に取得
+    const basePath = typeof window !== 'undefined' && window.location.pathname.includes('/tips-docs') ? '/tips-docs' : ''
+    const response = await fetch(`${basePath}/data/projects.json`)
     if (!response.ok) {
       throw new Error(`Failed to load data: ${response.status}`)
     }
