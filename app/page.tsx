@@ -46,14 +46,14 @@ export default function Home() {
     setSubPaneTab('toc')
   }
 
-  const handleTermSelect = (termSlug: string) => {
-    setSelectedTerm(termSlug)
+  const handleTermSelect = (termPath: string) => {
+    setSelectedTerm(termPath)
     // ドキュメント選択はクリアしない（コンテンツペインの状態を保持）
     setSubPaneTab('preview') // サブペインをプレビュータブに切り替え
   }
 
-  const handleTermSelectFromMenu = (termSlug: string) => {
-    setSelectedTerm(termSlug)
+  const handleTermSelectFromMenu = (termPath: string) => {
+    setSelectedTerm(termPath)
     setSelectedDoc(null) // メニューから選択した場合はドキュメント選択をクリア
     setSubPaneTab('preview') // サブペインをプレビュータブに切り替え
   }

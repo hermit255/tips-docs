@@ -10,7 +10,7 @@ interface ContentPaneProps {
   terms: TermFile[]
   docs: DocFile[]
   projectName: string
-  onTermSelect: (termSlug: string) => void
+  onTermSelect: (termPath: string) => void
   onDocSelect: (docPath: string) => void
 }
 
@@ -64,8 +64,8 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
   //   }
   // }, [selectedTerm])
 
-  const handleTermMouseEnter = (termSlug: string, event: React.MouseEvent) => {
-    const termData = terms.find(t => t.slug === termSlug)
+  const handleTermMouseEnter = (termPath: string, event: React.MouseEvent) => {
+    const termData = terms.find(t => t.path === termPath)
     if (termData) {
       setTooltip({
         term: termData,
@@ -79,9 +79,9 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
     setTooltip(null)
   }
 
-  const handleTermClick = (termSlug: string) => {
+  const handleTermClick = (termPath: string) => {
     // 用語選択はするが、コンテンツペインでは用語ページを表示しない
-    onTermSelect(termSlug)
+    onTermSelect(termPath)
     setTooltip(null)
   }
 
@@ -89,9 +89,9 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
   const handleContentClick = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement
     if (target.classList.contains('term-link')) {
-      const termSlug = target.getAttribute('data-term')
-      if (termSlug) {
-        handleTermClick(termSlug)
+      const termPath = target.getAttribute('data-term')
+      if (termPath) {
+        handleTermClick(termPath)
       }
     } else if (target.classList.contains('doc-link')) {
       const docPath = target.getAttribute('data-doc')
@@ -107,11 +107,11 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
   const handleContentMouseMove = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement
     if (target.classList.contains('term-link')) {
-      const termSlug = target.getAttribute('data-term')
-      if (termSlug) {
+      const termPath = target.getAttribute('data-term')
+      if (termPath) {
         // 既にtooltipが表示されている場合は位置を更新しない
         if (!tooltip) {
-          handleTermMouseEnter(termSlug, event)
+          handleTermMouseEnter(termPath, event)
         }
       }
     } else {

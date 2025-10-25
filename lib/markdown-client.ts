@@ -108,8 +108,8 @@ function hasKanjiContext(text: string, matchIndex: number, matchLength: number):
   const afterChar = text[matchIndex + matchLength]
   
   // 前後に漢字があるかチェック
-  const hasKanjiBefore = beforeChar && isKanji(beforeChar)
-  const hasKanjiAfter = afterChar && isKanji(afterChar)
+  const hasKanjiBefore = beforeChar ? isKanji(beforeChar) : false
+  const hasKanjiAfter = afterChar ? isKanji(afterChar) : false
   
   return hasKanjiBefore || hasKanjiAfter
 }
@@ -172,6 +172,42 @@ export function buildMenuStructure(docs: DocFile[]): MenuItem[] {
   return rootItems
 }
 
+export function buildTermMenuStructure(terms: TermFile[]): MenuItem[] {
+  const menuMap = new Map<string, MenuItem>()
+  const rootItems: MenuItem[] = []
+  
+  for (const term of terms) {
+    const pathParts = term.path.split('/')
+    let currentPath = ''
+    let parentItems = rootItems
+    
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i]
+      currentPath = currentPath ? `${currentPath}/${part}` : part
+      
+      if (!menuMap.has(currentPath)) {
+        const isFile = i === pathParts.length - 1
+        const menuItem: MenuItem = {
+          name: isFile ? term.title : part.replace(/\.md$/, ''),
+          path: currentPath,
+          type: isFile ? 'file' : 'folder',
+          children: isFile ? undefined : []
+        }
+        
+        menuMap.set(currentPath, menuItem)
+        parentItems.push(menuItem)
+      }
+      
+      const currentItem = menuMap.get(currentPath)!
+      if (currentItem.children) {
+        parentItems = currentItem.children
+      }
+    }
+  }
+  
+  return rootItems
+}
+
 export function extractTocFromHtml(html: string): Array<{id: string, text: string, level: number}> {
   const toc: Array<{id: string, text: string, level: number}> = []
   
@@ -214,32 +250,134 @@ export function processContentWithLinks(
 ): string {
   let processedHtml = html
   
+  // 用語ファイル名を長さ順でソート（長い順）
+  const sortedTerms = [...terms].sort((a, b) => b.title.length - a.title.length)
+  
   // 用語ファイル名と一致するテキストを特殊リンクAに変換
-  terms.forEach(term => {
+  processedHtml = processTermsWithPriority(processedHtml, sortedTerms, currentFileName, exceptionRules)
+  
+  // ドキュメントファイル名を長さ順でソート（長い順）
+  const sortedDocs = [...docs].sort((a, b) => b.title.length - a.title.length)
+  
+  // ドキュメントファイル名と一致するテキストを特殊リンクBに変換
+  processedHtml = processDocsWithPriority(processedHtml, sortedDocs, currentFileName, exceptionRules)
+  
+  return processedHtml
+}
+
+function processTermsWithPriority(
+  html: string, 
+  sortedTerms: TermFile[], 
+  currentFileName: string, 
+  exceptionRules: LinkExceptionRule[]
+): string {
+  let processedHtml = html
+  
+  // デバッグ用ログ
+  console.log('Processing terms with priority:', sortedTerms.map(t => t.title))
+  
+  // すべての用語のマッチを検索して、長い名前を優先して処理
+  const allMatches: Array<{term: TermFile, match: string, start: number, end: number}> = []
+  
+  sortedTerms.forEach(term => {
     const termName = term.title
-    // ##で囲まれたテキストは除外
     const regex = new RegExp(`(?<!##)${termName}(?!##)`, 'g')
-    processedHtml = processedHtml.replace(regex, (match, offset) => {
-      // 例外ルールをチェック
-      if (shouldSkipLink(match, processedHtml, offset, currentFileName, exceptionRules)) {
-        return match // リンク化しない
-      }
-      return `<span class="term-link" data-term="${term.slug}">${match}</span>`
+    let match
+    while ((match = regex.exec(processedHtml)) !== null) {
+      allMatches.push({
+        term,
+        match: match[0],
+        start: match.index,
+        end: match.index + match[0].length
+      })
+    }
+  })
+  
+  console.log('All term matches found:', allMatches.map(m => ({term: m.term.title, match: m.match, start: m.start, end: m.end})))
+  
+  // 重複するマッチを除去（長い名前を優先）
+  const filteredMatches = allMatches.filter((match, index) => {
+    return !allMatches.some((otherMatch, otherIndex) => {
+      if (otherIndex === index) return false
+      // 他のマッチがこのマッチの範囲内にある場合は除外
+      return otherMatch.start <= match.start && otherMatch.end >= match.end
     })
   })
   
-  // ドキュメントファイル名と一致するテキストを特殊リンクBに変換
-  docs.forEach(doc => {
+  console.log('Filtered term matches:', filteredMatches.map(m => ({term: m.term.title, match: m.match, start: m.start, end: m.end})))
+  
+  // 開始位置の降順でソート（後ろから処理してインデックスのずれを防ぐ）
+  filteredMatches.sort((a, b) => b.start - a.start)
+  
+  // マッチを置換
+  filteredMatches.forEach(({term, match, start, end}) => {
+    // 例外ルールをチェック
+    if (shouldSkipLink(match, processedHtml, start, currentFileName, exceptionRules)) {
+      console.log('Skipping term link due to exception rules:', match)
+      return // リンク化しない
+    }
+    
+    console.log('Creating term link:', {term: term.title, match, start, end})
+    
+    const before = processedHtml.substring(0, start)
+    const after = processedHtml.substring(end)
+    const replacement = `<span class="term-link" data-term="${term.path}">${match}</span>`
+    
+    processedHtml = before + replacement + after
+  })
+  
+  return processedHtml
+}
+
+function processDocsWithPriority(
+  html: string, 
+  sortedDocs: DocFile[], 
+  currentFileName: string, 
+  exceptionRules: LinkExceptionRule[]
+): string {
+  let processedHtml = html
+  
+  // すべてのドキュメントのマッチを検索して、長い名前を優先して処理
+  const allMatches: Array<{doc: DocFile, match: string, start: number, end: number}> = []
+  
+  sortedDocs.forEach(doc => {
     const docName = doc.title
-    // ##で囲まれたテキストは除外
     const regex = new RegExp(`(?<!##)${docName}(?!##)`, 'g')
-    processedHtml = processedHtml.replace(regex, (match, offset) => {
-      // 例外ルールをチェック
-      if (shouldSkipLink(match, processedHtml, offset, currentFileName, exceptionRules)) {
-        return match // リンク化しない
-      }
-      return `<span class="doc-link" data-doc="${doc.path}">${match}</span>`
+    let match
+    while ((match = regex.exec(processedHtml)) !== null) {
+      allMatches.push({
+        doc,
+        match: match[0],
+        start: match.index,
+        end: match.index + match[0].length
+      })
+    }
+  })
+  
+  // 重複するマッチを除去（長い名前を優先）
+  const filteredMatches = allMatches.filter((match, index) => {
+    return !allMatches.some((otherMatch, otherIndex) => {
+      if (otherIndex === index) return false
+      // 他のマッチがこのマッチの範囲内にある場合は除外
+      return otherMatch.start <= match.start && otherMatch.end >= match.end
     })
+  })
+  
+  // 開始位置の降順でソート（後ろから処理してインデックスのずれを防ぐ）
+  filteredMatches.sort((a, b) => b.start - a.start)
+  
+  // マッチを置換
+  filteredMatches.forEach(({doc, match, start, end}) => {
+    // 例外ルールをチェック
+    if (shouldSkipLink(match, processedHtml, start, currentFileName, exceptionRules)) {
+      return // リンク化しない
+    }
+    
+    const before = processedHtml.substring(0, start)
+    const after = processedHtml.substring(end)
+    const replacement = `<span class="doc-link" data-doc="${doc.path}">${match}</span>`
+    
+    processedHtml = before + replacement + after
   })
   
   return processedHtml

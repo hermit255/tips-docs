@@ -10,7 +10,7 @@ export async function GET(
     const project = searchParams.get('project') || 'default'
     
     const terms = await getTermFiles(project)
-    const term = terms.find(t => t.slug === params.slug)
+    const term = terms.find(t => t.path === params.slug)
     
     if (!term) {
       return NextResponse.json({ error: 'Term not found' }, { status: 404 })

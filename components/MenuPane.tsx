@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DocFile, TermFile, MenuItem, buildMenuStructure } from '@/lib/markdown-client'
+import { DocFile, TermFile, MenuItem, buildMenuStructure, buildTermMenuStructure } from '@/lib/markdown-client'
 
 interface Project {
   name: string
@@ -24,6 +24,7 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
   const [activeTab, setActiveTab] = useState<'docs' | 'terms'>('docs')
   
   const menuStructure = buildMenuStructure(docs)
+  const termMenuStructure = buildTermMenuStructure(terms)
 
   const renderMenuItem = (item: MenuItem, level: number = 0) => {
     const isSelected = selectedDoc === item.path
@@ -53,16 +54,30 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
     )
   }
 
-  const renderTermItem = (term: TermFile) => {
-    const isSelected = selectedTerm === term.slug
+  const renderTermMenuItem = (item: MenuItem, level: number = 0) => {
+    const isSelected = selectedTerm === item.path
+    const indentStyle = { paddingLeft: `${level * 20}px` }
     
     return (
-      <div
-        key={term.slug}
-        className={`menu-item ${isSelected ? 'selected' : ''}`}
-        onClick={() => onTermSelect(term.slug)}
-      >
-        <span className="menu-file">📖 {term.title}</span>
+      <div key={item.path}>
+        <div
+          className={`menu-item ${isSelected ? 'selected' : ''}`}
+          style={indentStyle}
+          onClick={() => {
+            if (item.type === 'file') {
+              console.log('MenuPane: Clicking term with path:', item.path)
+              console.log('MenuPane: Term item details:', { name: item.name, path: item.path, type: item.type })
+              onTermSelect(item.path)
+            }
+          }}
+        >
+          {item.type === 'folder' ? (
+            <span className="menu-folder">📁 {item.name}</span>
+          ) : (
+            <span className="menu-file">📖 {item.name}</span>
+          )}
+        </div>
+        {item.children && item.children.map(child => renderTermMenuItem(child, level + 1))}
       </div>
     )
   }
@@ -125,9 +140,9 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
         {activeTab === 'terms' && (
           <div>
             <h3>用語一覧</h3>
-            {terms.length > 0 ? (
+            {termMenuStructure.length > 0 ? (
               <div>
-                {terms.map(renderTermItem)}
+                {termMenuStructure.map(item => renderTermMenuItem(item))}
               </div>
             ) : (
               <p>用語がありません</p>
