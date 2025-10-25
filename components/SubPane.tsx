@@ -13,10 +13,10 @@ function translateH2Tags(html: string): string {
     'summary': '概要',
     'description': '詳細',
     'synonyms': '類義語',
-    'antonym': '対義語',
-    'sibling': '兄弟',
-    'parent': '親',
-    'child': '子'
+    'antonyms': '対義語',
+    'siblings': '兄弟',
+    'parents': '親',
+    'children': '子'
   }
   
   let translatedHtml = html
