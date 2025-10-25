@@ -19,7 +19,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
   const [doc, setDoc] = useState<DocFile | null>(null)
   const [term, setTerm] = useState<TermFile | null>(null)
   const [loading, setLoading] = useState(false)
-  const [tooltip, setTooltip] = useState<{term: TermFile, x: number, y: number} | null>(null)
+  const [tooltip, setTooltip] = useState<{term: TermFile, linkElement: HTMLElement} | null>(null)
 
   useEffect(() => {
     if (selectedDoc && projectName) {
@@ -69,13 +69,12 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
   //   }
   // }, [selectedTerm])
 
-  const handleTermMouseEnter = (termPath: string, event: React.MouseEvent) => {
+  const handleTermMouseEnter = (termPath: string, linkElement: HTMLElement) => {
     const termData = terms.find(t => t.path === termPath)
     if (termData) {
       setTooltip({
         term: termData,
-        x: event.clientX,
-        y: event.clientY
+        linkElement: linkElement
       })
     }
   }
@@ -116,7 +115,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
       if (termPath) {
         // 既にtooltipが表示されている場合は位置を更新しない
         if (!tooltip) {
-          handleTermMouseEnter(termPath, event)
+          handleTermMouseEnter(termPath, target)
         }
       }
     } else {
@@ -153,8 +152,7 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
         {tooltip && (
           <TermTooltip
             term={tooltip.term}
-            x={tooltip.x}
-            y={tooltip.y}
+            linkElement={tooltip.linkElement}
             onClick={() => handleTermClick(tooltip.term.slug)}
           />
         )}

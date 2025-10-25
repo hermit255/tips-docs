@@ -4,8 +4,7 @@ import { TermFile } from '@/types'
 
 interface TermTooltipProps {
   term: TermFile
-  x: number
-  y: number
+  linkElement: HTMLElement
   onClick: () => void
 }
 
@@ -75,19 +74,35 @@ function extractSynonymsFromHtml(html: string): string[] {
   return []
 }
 
-export function TermTooltip({ term, x, y, onClick }: TermTooltipProps) {
+export function TermTooltip({ term, linkElement, onClick }: TermTooltipProps) {
   const summary = extractSummaryFromHtml(term.html)
   const synonyms = extractSynonymsFromHtml(term.html)
+  
+  // リンク要素の位置を取得
+  const getTooltipPosition = () => {
+    const rect = linkElement.getBoundingClientRect()
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+    
+    return {
+      left: rect.right + scrollLeft + 5, // リンクテキストの終了位置よりやや右
+      top: rect.top + scrollTop // リンクテキストのトップ位置
+    }
+  }
+  
+  const position = getTooltipPosition()
   
   return (
     <div
       className="tooltip"
       style={{
-        left: `${x + 10}px`,
-        top: `${y - 10}px`,
+        position: 'absolute',
+        left: `${position.left}px`,
+        top: `${position.top}px`,
         maxWidth: '300px',
         maxHeight: '200px',
         overflow: 'auto',
+        zIndex: 1000,
       }}
       onClick={onClick}
     >

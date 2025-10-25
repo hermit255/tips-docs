@@ -22,7 +22,7 @@ interface SubPaneProps {
 export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, docs, projectName, onTermSelect, onDocSelect }: SubPaneProps) {
   const [toc, setToc] = useState<Array<{id: string, text: string, level: number}>>([])
   const [doc, setDoc] = useState<DocFile | null>(null)
-  const [tooltip, setTooltip] = useState<{term: TermFile, x: number, y: number} | null>(null)
+  const [tooltip, setTooltip] = useState<{term: TermFile, linkElement: HTMLElement} | null>(null)
   
   const { width, startResize } = useResizable({
     initialWidth: 300,
@@ -138,8 +138,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
           if (term) {
             setTooltip({
               term,
-              x: event.clientX,
-              y: event.clientY
+              linkElement: target
             })
           }
         }
@@ -225,8 +224,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
       {tooltip && (
         <TermTooltip
           term={tooltip.term}
-          x={tooltip.x}
-          y={tooltip.y}
+          linkElement={tooltip.linkElement}
           onClick={() => handleTermClick(tooltip.term.slug)}
         />
       )}
