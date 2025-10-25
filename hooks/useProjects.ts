@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getProjects } from '@/lib/markdown-client-static'
 
 export interface Project {
   name: string
@@ -12,19 +13,19 @@ export function useProjects() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchProjects() {
+    async function loadProjects() {
       try {
-        const response = await fetch('/api/projects')
-        const data = await response.json()
+        // 静的データを読み込み
+        const data = await getProjects()
         setProjects(data)
       } catch (error) {
-        console.error('Failed to fetch projects:', error)
+        console.error('Failed to load projects:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchProjects()
+    loadProjects()
   }, [])
 
   return { projects, loading }

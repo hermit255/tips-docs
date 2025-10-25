@@ -22,30 +22,26 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
 
   useEffect(() => {
     if (selectedDoc && projectName) {
-      console.log('ContentPane: Fetching doc with path:', selectedDoc, 'project:', projectName)
-      const encodedPath = encodeURIComponent(selectedDoc)
-      const url = `/api/docs/${encodedPath}?project=${encodeURIComponent(projectName)}`
-      console.log('ContentPane: Encoded path:', encodedPath)
-      console.log('ContentPane: Full URL:', url)
+      console.log('ContentPane: Loading doc with path:', selectedDoc, 'project:', projectName)
       setLoading(true)
-      fetch(url)
-        .then(res => {
-          console.log('ContentPane: Response status:', res.status)
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`)
+      
+      // 静的データを読み込み
+      import('@/lib/markdown-client-static').then(({ getDocFiles }) => {
+        getDocFiles(projectName).then(docs => {
+          const doc = docs.find(d => d.path === selectedDoc)
+          if (doc) {
+            console.log('ContentPane: Found doc:', doc.path)
+            setDoc(doc)
+            setTerm(null)
+          } else {
+            console.log('ContentPane: Doc not found:', selectedDoc)
+            setDoc(null)
           }
-          return res.json()
-        })
-        .then(data => {
-          console.log('ContentPane: Received doc data:', data)
-          setDoc(data)
-          setTerm(null)
-        })
-        .catch(err => {
-          console.error('ContentPane: Failed to fetch doc:', err)
+        }).catch(err => {
+          console.error('ContentPane: Failed to load doc:', err)
           setDoc(null)
-        })
-        .finally(() => setLoading(false))
+        }).finally(() => setLoading(false))
+      })
     }
   }, [selectedDoc, projectName])
 

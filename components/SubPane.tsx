@@ -32,14 +32,20 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
 
   useEffect(() => {
     if (selectedDoc && projectName) {
-      fetch(`/api/docs/${selectedDoc}?project=${encodeURIComponent(projectName)}`)
-        .then(res => res.json())
-        .then((data: DocFile) => {
-          setDoc(data)
-          const tocData = extractTocFromHtml(data.html)
-          setToc(tocData)
-        })
-        .catch(err => console.error('Failed to fetch doc for TOC:', err))
+      // 静的データを読み込み
+      import('@/lib/markdown-client-static').then(({ getDocFiles }) => {
+        getDocFiles(projectName).then(docs => {
+          const doc = docs.find(d => d.path === selectedDoc)
+          if (doc) {
+            setDoc(doc)
+            const tocData = extractTocFromHtml(doc.html)
+            setToc(tocData)
+          } else {
+            setDoc(null)
+            setToc([])
+          }
+        }).catch(err => console.error('Failed to load doc for TOC:', err))
+      })
     } else {
       setDoc(null)
       setToc([])

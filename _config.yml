@@ -1,0 +1,34 @@
+# GitHub Pages Jekyll configuration
+# This file disables Jekyll processing for this repository
+
+# Disable Jekyll processing
+plugins: []
+
+# Disable all Jekyll features
+markdown: kramdown
+highlighter: rouge
+
+# Disable automatic page generation
+exclude:
+  - README.md
+  - LICENSE
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - package.json
+  - package-lock.json
+  - .gitignore
+  - .nojekyll
+  - Dockerfile
+  - docker-compose.yml
+  - tsconfig.json
+  - next.config.js
+  - next-env.d.ts
+  - .github
+  - app
+  - components
+  - hooks
+  - lib
+  - projects
+  - design
+  - config

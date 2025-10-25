@@ -41,13 +41,18 @@ jobs:
         echo "Build command completed"
         
         echo "Checking build output..."
-        if [ -d ".next" ]; then
-          echo ".next directory exists"
+        if [ -d "out" ]; then
+          echo "out directory exists (static export)"
+          ls -la out/
+          echo "Build artifacts found"
+          echo "build_success=true" >> $GITHUB_OUTPUT
+        elif [ -d ".next" ]; then
+          echo ".next directory exists (development build)"
           ls -la .next/
           echo "Build artifacts found"
           echo "build_success=true" >> $GITHUB_OUTPUT
         else
-          echo "ERROR: .next directory not found after build"
+          echo "ERROR: No build output directory found"
           echo "Current directory contents:"
           ls -la
           echo "build_success=false" >> $GITHUB_OUTPUT
@@ -66,13 +71,18 @@ jobs:
       run: |
         echo "Verifying build artifacts..."
         echo "Build success status: ${{ steps.build.outputs.build_success }}"
-        if [ -d ".next" ]; then
-          echo ".next directory exists"
+        if [ -d "out" ]; then
+          echo "out directory exists (static export)"
+          echo "Contents:"
+          ls -la out/
+          echo "File count: $(find out -type f | wc -l)"
+        elif [ -d ".next" ]; then
+          echo ".next directory exists (development build)"
           echo "Contents:"
           ls -la .next/
           echo "File count: $(find .next -type f | wc -l)"
         else
-          echo "ERROR: .next directory not found"
+          echo "ERROR: No build output directory found"
           echo "Current directory contents:"
           ls -la
         fi
@@ -82,7 +92,7 @@ jobs:
       if: steps.build.outputs.build_success == 'true'
       with:
         name: build-files
-        path: .next/
+        path: out/
         if-no-files-found: warn
         retention-days: 7
 

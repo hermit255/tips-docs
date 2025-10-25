@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { DocFile, TermFile } from '@/lib/markdown-client'
-import { useFileWatcher } from './useFileWatcher'
+import { getDocFiles, getTermFiles } from '@/lib/markdown-client-static'
 
 export function useMarkdownData(projectName: string) {
   const [docs, setDocs] = useState<DocFile[]>([])
@@ -14,13 +14,11 @@ export function useMarkdownData(projectName: string) {
     
     try {
       setLoading(true)
-      const [docsResponse, termsResponse] = await Promise.all([
-        fetch(`/api/docs?project=${encodeURIComponent(projectName)}`),
-        fetch(`/api/terms?project=${encodeURIComponent(projectName)}`)
+      // 静的データを読み込み
+      const [docsData, termsData] = await Promise.all([
+        getDocFiles(projectName),
+        getTermFiles(projectName)
       ])
-      
-      const docsData = await docsResponse.json()
-      const termsData = await termsResponse.json()
       
       setDocs(docsData)
       setTerms(termsData)
@@ -34,9 +32,6 @@ export function useMarkdownData(projectName: string) {
   useEffect(() => {
     fetchData()
   }, [fetchData])
-
-  // ファイル変更を監視してデータを再取得
-  useFileWatcher(fetchData)
 
   return { docs, terms, loading }
 }
