@@ -49,6 +49,7 @@ function preprocessMarkdown(content: string): string {
     .replace(/\r\n/g, '\n') // Windows改行を統一
     .replace(/\r/g, '\n')   // Mac改行を統一
     .replace(/\n{3,}/g, '\n\n') // 3つ以上の連続改行を2つに統一
+    .replace(/^#\s+.+$/gm, '') // h1タグを除去（重複防止のため）
 }
 
 export async function getDocFiles(projectName: string = 'default'): Promise<DocFile[]> {
