@@ -62,7 +62,7 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
           className={`menu-item ${isSelected ? 'selected' : ''}`}
           style={indentStyle}
           onClick={() => {
-            if (item.type === 'doc') {
+            if (item.type === 'term') {
               console.log('MenuPane: Clicking term with path:', item.path)
               console.log('MenuPane: Term item details:', { name: item.name, path: item.path, type: item.type })
               onTermSelect(item.path)
