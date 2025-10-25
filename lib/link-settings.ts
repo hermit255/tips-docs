@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { LinkSettings, LinkExceptionRule, DEFAULT_LINK_EXCEPTION_RULES } from './markdown-client'
+import { LinkSettings, LinkExceptionRule } from '@/types'
+import { DEFAULT_LINK_EXCEPTION_RULES } from './markdown-client'
 
 const CONFIG_PATH = path.join(process.cwd(), 'config', 'link-settings.json')
 
@@ -30,6 +31,7 @@ export function loadLinkSettings(): LinkSettings {
   
   // デフォルト設定を返す
   return {
+    enabled: true,
     rules: DEFAULT_LINK_EXCEPTION_RULES
   }
 }
@@ -63,6 +65,7 @@ export function updateLinkRule(ruleId: string, updates: Partial<LinkExceptionRul
       settings.rules.push({
         id: updates.id,
         name: updates.name,
+        pattern: updates.pattern || /.*/,
         description: updates.description || '',
         enabled: updates.enabled ?? true,
         type: updates.type,

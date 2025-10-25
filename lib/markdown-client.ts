@@ -1,62 +1,17 @@
-// クライアントサイド用の型定義とユーティリティ関数
+// クライアントサイド用のユーティリティ関数
 
-export interface DocFile {
-  slug: string
-  title: string
-  content: string
-  html: string
-  path: string
-}
+import { DocFile, TermFile, LinkExceptionRule, MenuItem } from '@/types'
 
-export interface TermFile {
-  slug: string
-  title: string
-  content: string
-  html: string
-  path: string
-  summary?: string
-  description?: string
-  synonyms?: string[]
-  antonyms?: string[]
-  siblings?: string[]
-  parents?: string[]
-  children?: string[]
-}
+// 特殊リンク例外ルールの型定義（共通型を使用）
 
-// 特殊リンク例外ルールの型定義
-export interface LinkExceptionRule {
-  id: string
-  name: string
-  description: string
-  enabled: boolean
-  type: 'self-reference' | 'kanji-context' | 'custom'
-  config?: {
-    // カスタムルール用の設定
-    pattern?: string
-    flags?: string
-  }
-}
-
-// 特殊リンク設定
-export interface LinkSettings {
-  rules: LinkExceptionRule[]
-}
+// 特殊リンク設定（共通型を使用）
 
 // デフォルトの例外ルール
 export const DEFAULT_LINK_EXCEPTION_RULES: LinkExceptionRule[] = [
   {
-    id: 'self-reference',
-    name: '自ファイル名参照',
-    description: '自mdファイル名に該当する場合は特殊リンクを設定しない',
-    enabled: true,
-    type: 'self-reference'
-  },
-  {
     id: 'kanji-context',
-    name: '漢字コンテキスト',
-    description: '該当するワードの前後どちらかに漢字がある場合は特殊リンクを設定しない',
-    enabled: false, // 日本語の特殊リンクには適していないため無効化
-    type: 'kanji-context'
+    pattern: /(?<=[一-龯])[^一-龯]*(?=[一-龯])/g,
+    description: '漢字コンテキストでのリンク化を制限'
   }
 ]
 
@@ -169,12 +124,7 @@ function isInsideHtmlAttribute(html: string, position: number): boolean {
   return false
 }
 
-export interface MenuItem {
-  name: string
-  path: string
-  type: 'file' | 'folder'
-  children?: MenuItem[]
-}
+// 共通のMenuItem型を使用
 
 export function buildMenuStructure(docs: DocFile[]): MenuItem[] {
   const menuMap = new Map<string, MenuItem>()
@@ -192,9 +142,9 @@ export function buildMenuStructure(docs: DocFile[]): MenuItem[] {
       if (!menuMap.has(currentPath)) {
         const isFile = i === pathParts.length - 1
         const menuItem: MenuItem = {
-          name: isFile ? doc.title : part.replace(/\.md$/, ''),
+          title: isFile ? doc.title : part.replace(/\.md$/, ''),
           path: currentPath,
-          type: isFile ? 'file' : 'folder',
+          type: isFile ? 'doc' : 'term',
           children: isFile ? undefined : []
         }
         
@@ -228,9 +178,9 @@ export function buildTermMenuStructure(terms: TermFile[]): MenuItem[] {
       if (!menuMap.has(currentPath)) {
         const isFile = i === pathParts.length - 1
         const menuItem: MenuItem = {
-          name: isFile ? term.title : part.replace(/\.md$/, ''),
+          title: isFile ? term.title : part.replace(/\.md$/, ''),
           path: currentPath,
-          type: isFile ? 'file' : 'folder',
+          type: isFile ? 'term' : 'doc',
           children: isFile ? undefined : []
         }
         
@@ -353,25 +303,16 @@ function processTermsWithPriority(
     // 用語名の後に日本語文字（敬語、助詞など）が続く場合も許可
     const regex = new RegExp(`(?<!##)${escapedTermName}(?!##)`, 'g')
     
-    console.log(`Processing term: "${termName}"`)
-    console.log(`Escaped term: "${escapedTermName}"`)
-    console.log(`Regex: ${regex}`)
-    
     let match
     while ((match = regex.exec(processedHtml)) !== null) {
-      console.log(`Found match for "${termName}": "${match[0]}" at position ${match.index}`)
-      
-      
       allMatches.push({
         term,
-        match: termName, // 用語名のみを使用（マッチしたテキスト全体ではなく）
+        match: termName,
         start: match.index,
-        end: match.index + termName.length // 用語名の長さを使用
+        end: match.index + termName.length
       })
     }
   })
-  
-  console.log('All term matches found:', allMatches.map(m => ({term: m.term.title, match: m.match, start: m.start, end: m.end})))
   
   // 重複するマッチを除去（長い名前を優先）
   const filteredMatches = allMatches.filter((match, index) => {
@@ -381,8 +322,6 @@ function processTermsWithPriority(
       return otherMatch.start <= match.start && otherMatch.end >= match.end
     })
   })
-  
-  console.log('Filtered term matches:', filteredMatches.map(m => ({term: m.term.title, match: m.match, start: m.start, end: m.end})))
   
   // 開始位置の降順でソート（後ろから処理してインデックスのずれを防ぐ）
   filteredMatches.sort((a, b) => b.start - a.start)

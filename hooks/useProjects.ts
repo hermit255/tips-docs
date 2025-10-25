@@ -1,12 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { getProjects } from '@/lib/markdown-client-static'
-
-export interface Project {
-  name: string
-  path: string
-}
+import { useState, useEffect, useMemo } from 'react'
+import { Project } from '@/types'
+import { DataLoader } from '@/lib/data-loader'
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -15,21 +11,7 @@ export function useProjects() {
   useEffect(() => {
     async function loadProjects() {
       try {
-        let projects: Project[] = []
-        
-        if (typeof window !== 'undefined' && window.location.pathname.includes('/tips-docs')) {
-          // GitHub Pages環境では静的データを使用
-          projects = await getProjects()
-        } else {
-          // ローカル環境ではAPIルートを使用
-          const response = await fetch('/api/projects')
-          if (response.ok) {
-            projects = await response.json()
-          } else {
-            throw new Error('Failed to fetch projects from API')
-          }
-        }
-        
+        const projects = await DataLoader.getProjects()
         setProjects(projects)
       } catch (error) {
         console.error('Failed to load projects:', error)
@@ -37,9 +19,15 @@ export function useProjects() {
         setLoading(false)
       }
     }
-
+    
     loadProjects()
   }, [])
 
-  return { projects, loading }
+  // メモ化された結果
+  const memoizedResult = useMemo(() => ({
+    projects,
+    loading
+  }), [projects, loading])
+
+  return memoizedResult
 }

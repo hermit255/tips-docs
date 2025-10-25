@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { DocFile, TermFile } from '@/lib/markdown-client'
-import { getDocFiles, getTermFiles } from '@/lib/markdown-client-static'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { DocFile, TermFile } from '@/types'
+import { DataLoader } from '@/lib/data-loader'
+import { debounce } from '@/lib/performance'
 
 export function useMarkdownData(projectName: string) {
   const [docs, setDocs] = useState<DocFile[]>([])
@@ -15,32 +16,10 @@ export function useMarkdownData(projectName: string) {
     try {
       setLoading(true)
       
-      // 環境に応じてデータソースを決定
-      let docsData: DocFile[] = []
-      let termsData: TermFile[] = []
-      
-      if (typeof window !== 'undefined' && window.location.pathname.includes('/tips-docs')) {
-        // GitHub Pages環境では静的データを使用
-        const [docsResult, termsResult] = await Promise.all([
-          getDocFiles(projectName),
-          getTermFiles(projectName)
-        ])
-        docsData = docsResult
-        termsData = termsResult
-      } else {
-        // ローカル環境ではAPIルートを使用
-        const [docsResponse, termsResponse] = await Promise.all([
-          fetch(`/api/docs?project=${encodeURIComponent(projectName)}`),
-          fetch(`/api/terms?project=${encodeURIComponent(projectName)}`)
-        ])
-        
-        if (docsResponse.ok && termsResponse.ok) {
-          docsData = await docsResponse.json()
-          termsData = await termsResponse.json()
-        } else {
-          throw new Error('Failed to fetch data from API')
-        }
-      }
+      const [docsData, termsData] = await Promise.all([
+        DataLoader.getDocFiles(projectName),
+        DataLoader.getTermFiles(projectName)
+      ])
       
       setDocs(docsData)
       setTerms(termsData)
@@ -51,9 +30,22 @@ export function useMarkdownData(projectName: string) {
     }
   }, [projectName])
 
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
+  // デバウンスされたfetchData
+  const debouncedFetchData = useMemo(
+    () => debounce(fetchData, 300),
+    [fetchData]
+  )
 
-  return { docs, terms, loading }
+  useEffect(() => {
+    debouncedFetchData()
+  }, [debouncedFetchData])
+
+  // メモ化された結果
+  const memoizedResult = useMemo(() => ({
+    docs,
+    terms,
+    loading
+  }), [docs, terms, loading])
+
+  return memoizedResult
 }

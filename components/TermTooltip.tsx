@@ -1,6 +1,6 @@
 'use client'
 
-import { TermFile } from '@/lib/markdown-client'
+import { TermFile } from '@/types'
 
 interface TermTooltipProps {
   term: TermFile

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { DocFile, TermFile, extractTocFromHtml, processContentWithLinks } from '@/lib/markdown-client'
+import { DocFile, TermFile } from '@/types'
+import { extractTocFromHtml, processContentWithLinks } from '@/lib/markdown-client'
 import { TermTooltip } from './TermTooltip'
 
 interface ContentPaneProps {
@@ -29,19 +30,8 @@ export function ContentPane({ selectedDoc, selectedTerm, terms, docs, projectNam
         try {
           let docs: DocFile[] = []
           
-          if (typeof window !== 'undefined' && window.location.pathname.includes('/tips-docs')) {
-            // GitHub Pages環境では静的データを使用
-            const { getDocFiles } = await import('@/lib/markdown-client-static')
-            docs = await getDocFiles(projectName)
-          } else {
-            // ローカル環境ではAPIルートを使用
-            const response = await fetch(`/api/docs?project=${encodeURIComponent(projectName)}`)
-            if (response.ok) {
-              docs = await response.json()
-            } else {
-              throw new Error('Failed to fetch docs from API')
-            }
-          }
+        const { DataLoader } = await import('@/lib/data-loader')
+        docs = await DataLoader.getDocFiles(projectName)
           
           const doc = docs.find(d => d.path === selectedDoc)
           if (doc) {

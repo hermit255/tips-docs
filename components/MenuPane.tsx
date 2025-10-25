@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { DocFile, TermFile, MenuItem, buildMenuStructure, buildTermMenuStructure } from '@/lib/markdown-client'
+import { DocFile, TermFile, MenuItem } from '@/types'
+import { buildMenuStructure, buildTermMenuStructure } from '@/lib/markdown-client'
 
-interface Project {
-  name: string
-  path: string
-}
+import { Project } from '@/types'
 
 interface MenuPaneProps {
   docs: DocFile[]
@@ -36,17 +34,17 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
           className={`menu-item ${isSelected ? 'selected' : ''}`}
           style={indentStyle}
           onClick={() => {
-            if (item.type === 'file') {
+            if (item.type === 'doc') {
               console.log('MenuPane: Clicking doc with path:', item.path)
               console.log('MenuPane: Item details:', { name: item.name, path: item.path, type: item.type })
               onDocSelect(item.path)
             }
           }}
         >
-          {item.type === 'folder' ? (
-            <span className="menu-folder">📁 {item.name}</span>
+          {item.type === 'term' ? (
+            <span className="menu-term">📄 {item.title}</span>
           ) : (
-            <span className="menu-file">📄 {item.name}</span>
+            <span className="menu-doc">📄 {item.title}</span>
           )}
         </div>
         {item.children && item.children.map(child => renderMenuItem(child, level + 1))}
@@ -64,17 +62,17 @@ export function MenuPane({ docs, terms, onDocSelect, onTermSelect, selectedDoc, 
           className={`menu-item ${isSelected ? 'selected' : ''}`}
           style={indentStyle}
           onClick={() => {
-            if (item.type === 'file') {
+            if (item.type === 'doc') {
               console.log('MenuPane: Clicking term with path:', item.path)
               console.log('MenuPane: Term item details:', { name: item.name, path: item.path, type: item.type })
               onTermSelect(item.path)
             }
           }}
         >
-          {item.type === 'folder' ? (
-            <span className="menu-folder">📁 {item.name}</span>
+          {item.type === 'term' ? (
+            <span className="menu-term">📖 {item.title}</span>
           ) : (
-            <span className="menu-file">📖 {item.name}</span>
+            <span className="menu-doc">📄 {item.title}</span>
           )}
         </div>
         {item.children && item.children.map(child => renderTermMenuItem(child, level + 1))}

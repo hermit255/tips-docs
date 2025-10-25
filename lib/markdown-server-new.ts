@@ -1,7 +1,7 @@
 // サーバーサイド用のマークダウン処理（リファクタリング版）
 
-import * as fs from 'fs'
-import * as path from 'path'
+import fs from 'fs'
+import path from 'path'
 import { DocFile, TermFile, MenuItem } from '@/types'
 import {
   processMarkdownFile,
@@ -19,8 +19,8 @@ export async function getProjects(): Promise<Array<{name: string, path: string}>
   }
   
   const projectNames = fs.readdirSync(projectsDirectory, { withFileTypes: true })
-    .filter((dirent: fs.Dirent) => dirent.isDirectory())
-    .map((dirent: fs.Dirent) => ({
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => ({
       name: dirent.name,
       path: dirent.name
     }))
