@@ -209,6 +209,7 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
                       onClick={handleContentClick}
                       onMouseMove={handleContentMouseMove}
                     >
+                      <h1>{term.title}</h1>
                       <div dangerouslySetInnerHTML={{ __html: processContentWithLinks(term.html, terms, docs, term.title) }} />
                     </div>
                   )
