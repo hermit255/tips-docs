@@ -76,18 +76,26 @@ function getDocFiles(projectName) {
   return files
 }
 
-// プロジェクトの用語一覧を取得
-function getTermFiles(projectName) {
-  const projectDir = path.join(projectsDir, projectName, 'terms')
-  if (!fs.existsSync(projectDir)) {
-    return []
+// ディレクトリを再帰的に探索して用語ファイルを取得
+function getTermFilesRecursive(dir, basePath = '') {
+  const files = []
+  
+  if (!fs.existsSync(dir)) {
+    return files
   }
   
-  const files = fs.readdirSync(projectDir)
-    .filter(file => file.endsWith('.md'))
-    .map(file => {
-      const filePath = path.join(projectDir, file)
-      const fileContents = fs.readFileSync(filePath, 'utf8')
+  const items = fs.readdirSync(dir, { withFileTypes: true })
+  
+  for (const item of items) {
+    const itemPath = path.join(dir, item.name)
+    const relativePath = basePath ? path.join(basePath, item.name) : item.name
+    
+    if (item.isDirectory()) {
+      // サブディレクトリを再帰的に探索
+      files.push(...getTermFilesRecursive(itemPath, relativePath))
+    } else if (item.isFile() && item.name.endsWith('.md')) {
+      // マークダウンファイルを処理
+      const fileContents = fs.readFileSync(itemPath, 'utf8')
       const { data, content } = matter(fileContents)
       
       // 改行処理を事前に実行
@@ -110,18 +118,25 @@ function getTermFiles(projectName) {
       }
       
       const h1Title = extractH1Title(content)
-      const title = data.title || h1Title || file.replace('.md', '')
+      const title = data.title || h1Title || item.name.replace('.md', '')
       
-      return {
-        slug: file.replace('.md', ''),
+      files.push({
+        slug: relativePath.replace('.md', ''),
         title,
         content,
         html,
-        path: file.replace('.md', '')
-      }
-    })
+        path: relativePath.replace('.md', '')
+      })
+    }
+  }
   
   return files
+}
+
+// プロジェクトの用語一覧を取得
+function getTermFiles(projectName) {
+  const projectDir = path.join(projectsDir, projectName, 'terms')
+  return getTermFilesRecursive(projectDir)
 }
 
 // マークダウンの前処理
