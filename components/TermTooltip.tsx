@@ -43,7 +43,42 @@ function renderHtmlSafely(html: string): JSX.Element {
   return <div dangerouslySetInnerHTML={{ __html: processedHtml }} />
 }
 
+// HTMLからsummaryセクションを抽出する関数
+function extractSummaryFromHtml(html: string): string {
+  if (!html) return ''
+  
+  // summaryセクションを抽出（改行を含む）
+  const summaryMatch = html.match(/<h2[^>]*id="summary"[^>]*>.*?<\/h2>([\s\S]*?)(?=<h2|$)/)
+  if (summaryMatch) {
+    return summaryMatch[1].trim()
+  }
+  
+  // summaryセクションが見つからない場合は、最初の段落を返す
+  const firstParagraph = html.match(/<p[^>]*>([\s\S]*?)<\/p>/)
+  if (firstParagraph) {
+    return firstParagraph[1].trim()
+  }
+  
+  return ''
+}
+
+// HTMLからsynonymsセクションを抽出する関数
+function extractSynonymsFromHtml(html: string): string[] {
+  if (!html) return []
+  
+  const synonymsMatch = html.match(/<h2[^>]*id="synonyms"[^>]*>.*?<\/h2>([\s\S]*?)(?=<h2|$)/)
+  if (synonymsMatch) {
+    const synonymsText = stripHtmlTags(synonymsMatch[1])
+    return synonymsText.split(/\s+/).filter(s => s.length > 0)
+  }
+  
+  return []
+}
+
 export function TermTooltip({ term, x, y, onClick }: TermTooltipProps) {
+  const summary = extractSummaryFromHtml(term.html)
+  const synonyms = extractSynonymsFromHtml(term.html)
+  
   return (
     <div
       className="tooltip"
@@ -56,21 +91,15 @@ export function TermTooltip({ term, x, y, onClick }: TermTooltipProps) {
       }}
       onClick={onClick}
     >
-      {term.summary && (
+      {summary && (
         <div style={{ marginTop: '4px', fontSize: '12px' }}>
-          {renderHtmlSafely(term.summary)}
+          {renderHtmlSafely(summary)}
         </div>
       )}
-      {term.synonyms && term.synonyms.length > 0 && (
+      {synonyms.length > 0 && (
         <div style={{ marginTop: '4px', fontSize: '11px', color: '#ddd' }}>
-          類義語: {term.synonyms.slice(0, 3).join(', ')}
-          {term.synonyms.length > 3 && '...'}
-        </div>
-      )}
-      {term.antonyms && term.antonyms.length > 0 && (
-        <div style={{ marginTop: '4px', fontSize: '11px', color: '#ddd' }}>
-          対義語: {term.antonyms.slice(0, 3).join(', ')}
-          {term.antonyms.length > 3 && '...'}
+          類義語: {synonyms.slice(0, 3).join(', ')}
+          {synonyms.length > 3 && '...'}
         </div>
       )}
       <div style={{ marginTop: '4px', fontSize: '10px', color: '#ccc' }}>
