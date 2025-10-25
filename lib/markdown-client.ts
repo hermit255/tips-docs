@@ -254,27 +254,35 @@ export function extractTocFromHtml(html: string): Array<{id: string, text: strin
   // デバッグ用ログ
   console.log('Extracting TOC from HTML:', html.substring(0, 500) + '...')
   
-  // id属性がある見出しを優先して検索
-  const headingWithIdRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>(.*?)<\/h[1-6]>/gi
+  // 見出しを検索（id属性の有無に関係なく）
+  const headingRegex = /<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi
   let match
-  while ((match = headingWithIdRegex.exec(html)) !== null) {
+  while ((match = headingRegex.exec(html)) !== null) {
     const level = parseInt(match[1])
-    const id = match[2]
-    const text = match[3].replace(/<[^>]*>/g, '') // HTMLタグを除去
+    const fullMatch = match[0]
+    const text = match[2].replace(/<[^>]*>/g, '') // HTMLタグを除去
+    
+    // id属性を抽出
+    const idMatch = fullMatch.match(/id="([^"]*)"/)
+    let id = idMatch ? idMatch[1] : ''
+    
+    // id属性がない場合は、見出しテキストからidを生成
+    if (!id) {
+      // 日本語対応のid生成
+      id = text
+        .toLowerCase()
+        .replace(/\s+/g, '-')           // スペースをハイフンに
+        .replace(/[^\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAFa-z0-9\-]/g, '') // 日本語文字、英数字、ハイフンのみ残す
+        .replace(/-+/g, '-')            // 連続するハイフンを1つに
+        .replace(/^-|-$/g, '')          // 先頭と末尾のハイフンを削除
+    }
+    
+    // 空のidの場合は、レベルとインデックスを使用
+    if (!id) {
+      id = `heading-${level}-${toc.length}`
+    }
     
     toc.push({ id, text, level })
-  }
-  
-  // id属性がない場合は、見出しテキストからidを生成
-  if (toc.length === 0) {
-    const headingRegex = /<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi
-    while ((match = headingRegex.exec(html)) !== null) {
-      const level = parseInt(match[1])
-      const text = match[2].replace(/<[^>]*>/g, '') // HTMLタグを除去
-      const id = text.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '')
-      
-      toc.push({ id, text, level })
-    }
   }
   
   console.log('Generated TOC:', toc)

@@ -47,9 +47,42 @@ export function SubPane({ tab, onTabChange, selectedDoc, selectedTerm, terms, do
   }, [selectedDoc, projectName])
 
   const handleTocClick = (id: string) => {
-    const element = document.getElementById(id)
+    console.log('TOC click:', id)
+    
+    // まずid属性で検索
+    let element = document.getElementById(id)
+    
+    // id属性で見つからない場合は、見出しテキストで検索
+    if (!element) {
+      const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      for (const heading of headings) {
+        const headingText = heading.textContent?.trim() || ''
+        const headingId = headingText
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAFa-z0-9\-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '')
+        
+        if (headingText === id || headingId === id) {
+          element = heading as HTMLElement
+          break
+        }
+      }
+    }
+    
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+      console.log('Found element:', element)
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else {
+      console.log('Element not found for id:', id)
+      // デバッグ用：現在のページの見出しを表示
+      const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      console.log('Available headings:', Array.from(headings).map(h => ({
+        text: h.textContent?.trim(),
+        id: h.id,
+        tagName: h.tagName
+      })))
     }
   }
 
