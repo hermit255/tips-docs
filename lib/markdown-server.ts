@@ -72,9 +72,18 @@ export async function getDocFiles(projectName: string = 'default'): Promise<DocF
       
       const html = processedContent.toString()
       
+      // h1タグからタイトルを抽出する関数
+      const extractH1Title = (content: string): string => {
+        const h1Match = content.match(/^#\s+(.+)$/m)
+        return h1Match ? h1Match[1].trim() : null
+      }
+      
+      const h1Title = extractH1Title(content)
+      const title = h1Title || '名無し'
+      
       return {
         slug: fileName.replace(/\.md$/, ''),
-        title: data.title || fileName.replace(/\.md$/, ''),
+        title,
         content,
         html,
         path: fileName
@@ -106,12 +115,21 @@ export async function getTermFiles(projectName: string = 'default'): Promise<Ter
       
       const html = processedContent.toString()
       
+      // h1タグからタイトルを抽出する関数
+      const extractH1Title = (content: string): string => {
+        const h1Match = content.match(/^#\s+(.+)$/m)
+        return h1Match ? h1Match[1].trim() : null
+      }
+      
+      const h1Title = extractH1Title(content)
+      const title = h1Title || '名無し'
+      
       // 用語ファイルの構造化データを抽出
       const sections = await parseTermSections(content)
       
       return {
         slug: fileName.replace(/\.md$/, ''),
-        title: data.title || fileName.replace(/\.md$/, ''),
+        title,
         content,
         html,
         path: fileName,

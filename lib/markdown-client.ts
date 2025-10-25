@@ -152,7 +152,7 @@ export function buildMenuStructure(docs: DocFile[]): MenuItem[] {
       if (!menuMap.has(currentPath)) {
         const isFile = i === pathParts.length - 1
         const menuItem: MenuItem = {
-          name: part.replace(/\.md$/, ''),
+          name: isFile ? doc.title : part.replace(/\.md$/, ''),
           path: currentPath,
           type: isFile ? 'file' : 'folder',
           children: isFile ? undefined : []
